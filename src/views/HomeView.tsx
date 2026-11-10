@@ -9,8 +9,8 @@ export function HomeView() {
       <div className="animate-page-enter relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         {/* Título Principal */}
         <div className="max-w-3xl text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight text-[#002855] sm:text-6xl">
-            Stock por balanza
+          <h1 className="text-4xl font-extrabold tracking-tight text-[#002855] sm:text-6xl">
+            STOCK DE ALMACENES
           </h1>
         </div>
 
@@ -41,7 +41,7 @@ export function HomeView() {
                 Despachador
               </h2>
               <p className="mt-1.5 text-sm font-medium text-slate-600">
-                Actualiza el stock disponible por almacén.
+                Actualizar medidas disponibles por almacén
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
@@ -53,7 +53,7 @@ export function HomeView() {
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
-              <span className="text-sm font-bold text-gerdau">Ingresar a Despacho</span>
+              <span className="text-sm font-bold text-gerdau">Abrir Editable Almacén</span>
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gerdau-soft text-gerdau transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-gerdau group-hover:text-white">
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </span>
@@ -81,6 +81,9 @@ export function HomeView() {
               <h2 className="mt-6 text-2xl font-extrabold text-slate-900 transition-colors group-hover:text-[#0056A3] sm:text-3xl">
                 Balanza
               </h2>
+              <p className="mt-1.5 text-sm font-medium text-slate-600">
+                Visualizar medidas disponibles por almacén
+              </p>
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
