@@ -17,9 +17,9 @@ export function App() {
             <Route path="/balanza" element={<ScaleView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          <footer className="border-t border-surface-border bg-white py-3 text-center text-xs text-slate-500">
+          <footer className="border-t border-blue-100 bg-white py-3 text-center text-xs text-slate-500">
             <strong className="font-semibold text-gerdau">Gerdau</strong> –{' '}
-            <strong className="font-semibold text-sider-red">Siderperú</strong>
+            <strong className="font-semibold text-gerdau-light">Siderperú</strong>
           </footer>
         </div>
       </BrowserRouter>

@@ -84,12 +84,16 @@ export function AppHeader() {
         </div>
       </div>
 
-      {/* Línea corporativa dual Gerdau + Siderperú */}
-      <div className="flex h-1 w-full">
-        <div className="h-full w-1/2 bg-gerdau" />
-        <div className="h-full w-10 bg-sider-amber" />
-        <div className="h-full flex-1 bg-sider-red" />
-      </div>
+      {/* Línea corporativa */}
+      {isHome ? (
+        <div className="h-1 w-full bg-gradient-to-r from-gerdau-dark via-gerdau-light to-sky-500" />
+      ) : (
+        <div className="flex h-1 w-full">
+          <div className="h-full w-1/2 bg-gerdau" />
+          <div className="h-full w-10 bg-sider-amber" />
+          <div className="h-full flex-1 bg-sider-red" />
+        </div>
+      )}
     </header>
   );
 }
