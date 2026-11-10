@@ -1,9 +1,9 @@
 import { ShiftCode, ShiftOption } from '../types/stock';
 
 export const SHIFT_OPTIONS: readonly ShiftOption[] = [
-  { code: '07:00', label: 'Turno 7:00 AM', schedule: '07:00 – 15:00' },
-  { code: '15:00', label: 'Turno 3:00 PM', schedule: '15:00 – 23:00' },
-  { code: '23:00', label: 'Turno 11:00 PM', schedule: '23:00 – 07:00' },
+  { code: '07:00', label: 'Turno Mañana · 7:00 AM', schedule: '07:00 – 15:00' },
+  { code: '15:00', label: 'Turno Tarde · 3:00 PM', schedule: '15:00 – 23:00' },
+  { code: '23:00', label: 'Turno Noche · 11:00 PM', schedule: '23:00 – 07:00' },
 ] as const;
 
 export function detectCurrentShift(date: Date = new Date()): ShiftCode {

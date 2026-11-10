@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   CheckCircle2,
+  Clock,
   Edit3,
   Plus,
   RefreshCw,
@@ -81,15 +82,17 @@ export function DispatcherView() {
               <h1 className="mt-2.5 text-xl font-extrabold text-slate-900 sm:text-2xl">
                 Gestión de Medidas Disponibles por Almacén
               </h1>
-              <p className="mt-1 text-xs text-slate-600 sm:text-sm">
-                Último cambio:{' '}
-                <strong className="font-mono text-slate-800">
-                  {formatTimeShort(state.lastUpdatedAt)}
-                </strong>
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-600 sm:text-sm">
+                <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span>
+                  Último cambio:{' '}
+                  <strong className="font-mono text-slate-800">
+                    {formatTimeShort(state.lastUpdatedAt)}
+                  </strong>
+                </span>
                 {state.lastVerifiedAt && (
                   <>
-                    {' '}
-                    · Verificado:{' '}
+                    <span>· Verificado:</span>
                     <strong className="font-mono text-emerald-700">
                       {formatTimeShort(state.lastVerifiedAt)}
                     </strong>

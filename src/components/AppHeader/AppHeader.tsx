@@ -10,17 +10,17 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-[76px] flex-wrap items-center justify-between gap-3 py-2.5">
+        <div className="flex min-h-[88px] flex-wrap items-center justify-between gap-3 py-3">
           {/* Esquina Superior Izquierda: Logo GERDAU */}
           <Link
             to="/"
             aria-label="Gerdau - Ir al inicio"
-            className="flex shrink-0 items-center rounded-lg p-1 transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau"
+            className="flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau"
           >
             <img
               src="/images/gerdaulogo.png"
               alt="Logo Gerdau"
-              className="h-10 w-auto object-contain sm:h-12"
+              className="h-14 w-auto object-contain sm:h-16"
             />
           </Link>
 
@@ -78,12 +78,12 @@ export function AppHeader() {
           <Link
             to="/"
             aria-label="Siderperú - Ir al inicio"
-            className="order-2 flex shrink-0 items-center rounded-lg p-1 transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red sm:order-3"
+            className="order-2 flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red sm:order-3"
           >
             <img
               src="/images/siderlogo.png"
               alt="Logo Siderperú"
-              className="h-7 w-auto object-contain sm:h-9"
+              className="h-10 w-auto object-contain sm:h-12"
             />
           </Link>
         </div>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Filter, Lock, Monitor, Radio, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Filter, Lock, Monitor, Radio, Search, X } from 'lucide-react';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
@@ -74,7 +74,8 @@ export function ScaleView() {
                   <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-600" aria-hidden="true" />
                   Sincronizado en vivo
                 </span>
-                <span className="rounded-md bg-gerdau-soft px-2.5 py-1 text-xs font-bold text-gerdau">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-gerdau-soft px-2.5 py-1 text-xs font-bold text-gerdau">
+                  <Clock className="h-3.5 w-3.5 text-sider-amber" aria-hidden="true" />
                   {shiftInfo.label}
                 </span>
               </div>
