@@ -1,43 +1,18 @@
-import {
-  ArrowRight,
-  Clock,
-  Edit3,
-  Layers,
-  Lock,
-  Monitor,
-  RefreshCw,
-  Search,
-  ShieldCheck,
-  Warehouse,
-} from 'lucide-react';
+import { ArrowRight, Edit3, Layers, Lock, Monitor, Warehouse } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useStock } from '../context/StockContext';
-import { getShiftOption } from '../utils/shifts';
 
 export function HomeView() {
-  const { state } = useStock();
-  const shiftInfo = getShiftOption(state.shift);
-
   return (
     <main className="bg-industrial-grid flex flex-1 items-center">
       <div className="animate-page-enter mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        {/* Encabezado Principal */}
+        {/* Título Principal */}
         <div className="max-w-3xl text-center">
           <h1 className="text-5xl font-extrabold tracking-tight text-gerdau sm:text-6xl">
             Stock por balanza
           </h1>
-          <p className="mt-3 text-lg font-semibold text-slate-700 sm:text-2xl">
-            Stock por Almacén · Productos Siderúrgicos
-          </p>
-
-          {/* Indicador estético de turno */}
-          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-surface-border bg-white px-4 py-1.5 text-xs font-bold tracking-wide text-gerdau shadow-sm sm:text-sm">
-            <Clock className="h-4 w-4 text-sider-amber" aria-hidden="true" />
-            <span>{shiftInfo.label}</span>
-          </div>
         </div>
 
-        {/* Dos Tarjetas Principales (Dinámicas y con Íconos) */}
+        {/* Dos Tarjetas Principales */}
         <section
           aria-label="Selección de rol"
           className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2"
@@ -72,13 +47,6 @@ export function HomeView() {
                   <Layers className="h-3.5 w-3.5 text-gerdau" aria-hidden="true" />
                   4 almacenes
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface-panel px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors group-hover:border-gerdau/25 group-hover:bg-gerdau-soft/50">
-                  <RefreshCw
-                    className="h-3.5 w-3.5 text-sider-amber transition-transform duration-500 group-hover:rotate-90"
-                    aria-hidden="true"
-                  />
-                  Tiempo real
-                </span>
               </div>
             </div>
 
@@ -111,20 +79,6 @@ export function HomeView() {
               <h2 className="mt-6 text-2xl font-extrabold text-slate-900 transition-colors group-hover:text-sider-red sm:text-3xl">
                 Balanza
               </h2>
-              <p className="mt-1.5 text-sm font-medium text-slate-600">
-                Consulta medidas disponibles para picking SAP.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface-panel px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors group-hover:border-sider-red/25 group-hover:bg-sider-red-soft/50">
-                  <Search className="h-3.5 w-3.5 text-sider-red" aria-hidden="true" />
-                  Búsqueda rápida
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface-panel px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors group-hover:border-sider-red/25 group-hover:bg-sider-red-soft/50">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
-                  Monitor en vivo
-                </span>
-              </div>
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-surface-border pt-4">

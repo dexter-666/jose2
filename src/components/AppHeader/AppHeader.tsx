@@ -25,13 +25,8 @@ export function AppHeader() {
           </Link>
 
           {/* Centro: Navegación contextual y botón Volver al Inicio */}
-          <div className="order-3 flex w-full items-center justify-center gap-2 border-t border-surface-border pt-2 sm:order-2 sm:w-auto sm:border-t-0 sm:pt-0">
-            {isHome ? (
-              <div className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface-panel px-4 py-1.5 text-xs font-semibold tracking-wide text-gerdau uppercase">
-                <span className="h-2 w-2 rounded-full bg-sider-amber" aria-hidden="true" />
-                Sistema de Control · Stock por Balanza / Almacén
-              </div>
-            ) : (
+          {!isHome && (
+            <div className="order-3 flex w-full items-center justify-center gap-2 border-t border-surface-border pt-2 sm:order-2 sm:w-auto sm:border-t-0 sm:pt-0">
               <nav
                 aria-label="Navegación principal"
                 className="flex flex-wrap items-center justify-center gap-2"
@@ -71,8 +66,8 @@ export function AppHeader() {
                   </Link>
                 </div>
               </nav>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Esquina Superior Derecha: Logo SIDERPERU */}
           <Link

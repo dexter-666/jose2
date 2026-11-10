@@ -18,7 +18,6 @@ export function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <footer className="border-t border-surface-border bg-white py-3 text-center text-xs text-slate-500">
-            Sistema de Control de Stock por Balanza / Almacén ·{' '}
             <strong className="font-semibold text-gerdau">Gerdau</strong> –{' '}
             <strong className="font-semibold text-sider-red">Siderperú</strong>
           </footer>
