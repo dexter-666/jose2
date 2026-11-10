@@ -1,4 +1,4 @@
-import { ArrowRight, Edit3, Layers, Lock, Monitor, Warehouse } from 'lucide-react';
+import { ArrowRight, Edit3, Lock, Monitor, Warehouse } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function HomeView() {
@@ -43,13 +43,6 @@ export function HomeView() {
               <p className="mt-1.5 text-sm font-medium text-slate-600">
                 Actualizar medidas disponibles por almacén
               </p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-[#F4F8FD] px-2.5 py-1.5 text-xs font-semibold text-gerdau transition-colors group-hover:border-gerdau/30 group-hover:bg-gerdau-soft">
-                  <Layers className="h-3.5 w-3.5 text-gerdau-light" aria-hidden="true" />
-                  4 almacenes
-                </span>
-              </div>
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">

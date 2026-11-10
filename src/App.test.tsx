@@ -17,6 +17,7 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByRole('heading', { name: /stock de almacenes/i })).toBeInTheDocument();
     expect(screen.getByText(/actualizar medidas disponibles por almacén/i)).toBeInTheDocument();
     expect(screen.getByText(/visualizar medidas disponibles por almacén/i)).toBeInTheDocument();
+    expect(screen.queryByText(/4 almacenes/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/estado actual de planta/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/productos siderúrgicos/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/sistema de control · stock por balanza/i)).not.toBeInTheDocument();
