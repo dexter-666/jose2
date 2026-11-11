@@ -14,6 +14,11 @@ import {
   WAREHOUSES,
 } from '../utils/measures';
 import {
+  isFirebaseConfigured,
+  pushFirebaseStockState,
+  subscribeFirebaseStockState,
+} from '../services/firebaseSync';
+import {
   createBrowserSyncTransport,
   createInitialStockState,
   fetchRemoteStockState,
@@ -66,8 +71,11 @@ const CLOUD_POLL_INTERVAL_MS = 3000;
 const StockContext = createContext<StockContextValue | null>(null);
 
 export function StockProvider({ children }: { children: React.ReactNode }) {
+  const firebaseEnabled = isFirebaseConfigured();
   const [state, setState] = useState<StockState>(() => loadPersistedStockState());
-  const [syncMode, setSyncMode] = useState<SyncMode>('local-browser');
+  const [syncMode, setSyncMode] = useState<SyncMode>(() =>
+    firebaseEnabled ? 'cloud-firebase' : 'local-browser'
+  );
   const [recentPulse, setRecentPulse] = useState<RecentPulseState | null>(null);
 
   const stateRef = useRef<StockState>(state);
@@ -77,6 +85,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
   const pulseTimeoutRef = useRef<number | null>(null);
   const isPublishingRef = useRef(false);
   const hasLocalCommitRef = useRef(false);
+  const hasSeenFirebaseSnapshotRef = useRef(false);
 
   const triggerPulse = useCallback((meta: StockChangeMetadata) => {
     if (pulseTimeoutRef.current !== null) {
@@ -131,13 +140,47 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const transport = transportRef.current;
-    const unsubscribe = transport.subscribe((envelope: SyncEnvelope) => {
+    const unsubscribeLocal = transport.subscribe((envelope: SyncEnvelope) => {
       stateRef.current = envelope.state;
       setState(envelope.state);
       triggerPulse(envelope.meta);
     });
 
-    // Initial cloud sync check (upgrades to 'cloud-redis' automatically if configured on Vercel)
+    if (firebaseEnabled) {
+      setSyncMode('cloud-firebase');
+      const unsubscribeFirebase = subscribeFirebaseStockState(({ state: remoteState, meta }) => {
+        const isInitialSnapshot = !hasSeenFirebaseSnapshotRef.current;
+        hasSeenFirebaseSnapshotRef.current = true;
+
+        if (isInitialSnapshot && hasLocalCommitRef.current) return;
+
+        if (
+          !isInitialSnapshot &&
+          remoteState.revision <= stateRef.current.revision &&
+          remoteState.lastVerifiedAt === stateRef.current.lastVerifiedAt
+        ) {
+          return;
+        }
+
+        stateRef.current = remoteState;
+        setState(remoteState);
+        savePersistedStockState(remoteState);
+
+        if (!isInitialSnapshot && meta && meta.sourceTabId !== TAB_ID) {
+          triggerPulse(meta);
+        }
+      });
+
+      return () => {
+        unsubscribeLocal();
+        unsubscribeFirebase();
+        if (pulseTimeoutRef.current !== null) {
+          window.clearTimeout(pulseTimeoutRef.current);
+        }
+      };
+    }
+
+    // Fallback: Upstash Redis polling (/api/stock) if configured on Vercel
     void syncFromCloud(true);
 
     const handleVisibilityOrFocus = () => {
@@ -161,7 +204,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     }, CLOUD_POLL_INTERVAL_MS);
 
     return () => {
-      unsubscribe();
+      unsubscribeLocal();
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
       window.removeEventListener('focus', handleVisibilityOrFocus);
       window.clearInterval(pollTimer);
@@ -169,29 +212,42 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
         window.clearTimeout(pulseTimeoutRef.current);
       }
     };
-  }, [syncFromCloud, triggerPulse]);
+  }, [firebaseEnabled, syncFromCloud, triggerPulse]);
 
-  const publishEnvelope = useCallback(async (envelope: SyncEnvelope) => {
-    hasLocalCommitRef.current = true;
-    stateRef.current = envelope.state;
-    setState(envelope.state);
-    transportRef.current.publish(envelope);
+  const publishEnvelope = useCallback(
+    async (envelope: SyncEnvelope) => {
+      hasLocalCommitRef.current = true;
+      stateRef.current = envelope.state;
+      setState(envelope.state);
+      transportRef.current.publish(envelope);
 
-    isPublishingRef.current = true;
-    try {
-      const remoteResult = await pushRemoteStockState(envelope);
-      if (remoteResult?.configured) {
-        setSyncMode('cloud-redis');
-        if (remoteResult.ok && remoteResult.state) {
-          stateRef.current = remoteResult.state;
-          setState(remoteResult.state);
-          savePersistedStockState(remoteResult.state);
+      if (firebaseEnabled) {
+        isPublishingRef.current = true;
+        try {
+          await pushFirebaseStockState(envelope);
+        } finally {
+          isPublishingRef.current = false;
         }
+        return;
       }
-    } finally {
-      isPublishingRef.current = false;
-    }
-  }, []);
+
+      isPublishingRef.current = true;
+      try {
+        const remoteResult = await pushRemoteStockState(envelope);
+        if (remoteResult?.configured) {
+          setSyncMode('cloud-redis');
+          if (remoteResult.ok && remoteResult.state) {
+            stateRef.current = remoteResult.state;
+            setState(remoteResult.state);
+            savePersistedStockState(remoteResult.state);
+          }
+        }
+      } finally {
+        isPublishingRef.current = false;
+      }
+    },
+    [firebaseEnabled]
+  );
 
   const commitState = useCallback(
     (

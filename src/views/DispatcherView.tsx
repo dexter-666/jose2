@@ -198,9 +198,11 @@ export function DispatcherView() {
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
                     <span className="h-2 w-2 rounded-full bg-orange-500" />
-                    {syncMode === 'cloud-redis'
-                      ? 'Nube activa · Multi-dispositivo'
-                      : 'Sincronizado con Balanza'}
+                    {syncMode === 'cloud-firebase'
+                      ? 'Firebase en vivo · Multi-dispositivo'
+                      : syncMode === 'cloud-redis'
+                        ? 'Nube activa · Multi-dispositivo'
+                        : 'Sincronizado con Balanza'}
                   </span>
                 )}
               </div>

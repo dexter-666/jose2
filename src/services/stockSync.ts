@@ -23,7 +23,7 @@ export interface SyncEnvelope {
   meta: StockChangeMetadata;
 }
 
-export type SyncMode = 'cloud-redis' | 'local-browser';
+export type SyncMode = 'cloud-firebase' | 'cloud-redis' | 'local-browser';
 
 export interface RemoteFetchResult {
   configured: boolean;
@@ -79,29 +79,43 @@ export function createInitialStockState(): StockState {
 export function sanitizeStockState(raw: unknown): StockState | null {
   if (!raw || typeof raw !== 'object') return null;
   const candidate = raw as Partial<StockState>;
-  if (!Array.isArray(candidate.catalog) || !candidate.warehouses) return null;
+  const rawCatalog = Array.isArray(candidate.catalog)
+    ? candidate.catalog
+    : candidate.catalog && typeof candidate.catalog === 'object'
+      ? Object.values(candidate.catalog as Record<string, unknown>)
+      : null;
+
+  if (!rawCatalog) return null;
 
   const validCatalog = sortCatalogMeasures(
-    candidate.catalog.filter(
+    rawCatalog.filter(
       (item): item is MeasureItem =>
         Boolean(item) &&
-        typeof item.id === 'string' &&
-        typeof item.label === 'string' &&
-        typeof item.diameterMm === 'number' &&
-        typeof item.lengthM === 'number'
+        typeof item === 'object' &&
+        typeof (item as MeasureItem).id === 'string' &&
+        typeof (item as MeasureItem).label === 'string' &&
+        typeof (item as MeasureItem).diameterMm === 'number' &&
+        typeof (item as MeasureItem).lengthM === 'number'
     )
   );
 
   if (validCatalog.length === 0) return null;
 
   const catalogMap = new Map<string, MeasureItem>(validCatalog.map((m) => [m.id, m]));
+  const rawWarehouses =
+    candidate.warehouses && typeof candidate.warehouses === 'object'
+      ? (candidate.warehouses as Record<string, unknown>)
+      : {};
   const normalizedWarehouses = {} as WarehouseStockMap;
 
   for (const wh of WAREHOUSES) {
-    const rawList = (candidate.warehouses as Record<string, unknown>)[wh.id];
-    const idList = Array.isArray(rawList)
-      ? rawList.filter((id): id is string => typeof id === 'string')
-      : [];
+    const rawList = rawWarehouses[wh.id];
+    const listValues = Array.isArray(rawList)
+      ? rawList
+      : rawList && typeof rawList === 'object'
+        ? Object.values(rawList as Record<string, unknown>)
+        : [];
+    const idList = listValues.filter((id): id is string => typeof id === 'string');
     normalizedWarehouses[wh.id] = sortMeasureIdsByCatalog(idList, catalogMap);
   }
 

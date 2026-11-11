@@ -146,3 +146,4 @@ export async function POST(request: Request): Promise<Response> {
     return jsonResponse({ ok: false, configured: true, error: message }, 500);
   }
 }
+
