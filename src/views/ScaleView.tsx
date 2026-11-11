@@ -4,7 +4,7 @@ import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIn
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
 import { matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
-import { formatTimeShort, getShiftOption } from '../utils/shifts';
+import { formatTime12h, getShiftOption } from '../utils/shifts';
 
 const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4', '1"'] as const;
 
@@ -84,20 +84,14 @@ export function ScaleView() {
                 <Monitor className="h-6 w-6 shrink-0 text-sider-red" aria-hidden="true" />
                 Disponibilidad de Stock por Almacén
               </h1>
-              <p className="mt-1 text-xs text-slate-600 sm:text-sm">
-                Vista no modificable para consulta de picking SAP · Última actualización:{' '}
-                <strong className="font-mono text-slate-900">
-                  {formatTimeShort(state.lastUpdatedAt)}
-                </strong>
-                {state.lastVerifiedAt && (
-                  <>
-                    {' '}
-                    · Verificado por Despacho:{' '}
-                    <strong className="font-mono text-emerald-700">
-                      {formatTimeShort(state.lastVerifiedAt)}
-                    </strong>
-                  </>
-                )}
+              <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
+                <Clock className="h-4 w-4 text-sider-red" aria-hidden="true" />
+                <span>
+                  Última modificación:{' '}
+                  <strong className="font-mono text-sm font-extrabold text-slate-900 sm:text-base">
+                    {formatTime12h(state.lastVerifiedAt)}
+                  </strong>
+                </span>
               </p>
             </div>
 

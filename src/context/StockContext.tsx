@@ -5,6 +5,7 @@ import {
   StockChangeMetadata,
   StockState,
   WarehouseId,
+  WarehouseStockMap,
 } from '../types/stock';
 import {
   buildMeasureItem,
@@ -47,6 +48,11 @@ interface StockContextValue {
   ) => { ok: boolean; error?: string; measure?: MeasureItem };
   setShift: (shift: ShiftCode) => void;
   verifyStock: () => void;
+  confirmStockChanges: (payload: {
+    catalog: MeasureItem[];
+    warehouses: WarehouseStockMap;
+    shift: ShiftCode;
+  }) => string;
   resetDemoStock: () => void;
   dismissPulse: () => void;
 }
@@ -313,6 +319,71 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     );
   }, [commitState]);
 
+  const confirmStockChanges = useCallback(
+    (payload: {
+      catalog: MeasureItem[];
+      warehouses: WarehouseStockMap;
+      shift: ShiftCode;
+    }): string => {
+      const confirmedAt = new Date().toISOString();
+      const sortedCatalog = sortCatalogMeasures(payload.catalog);
+      const map = new Map<string, MeasureItem>(sortedCatalog.map((m) => [m.id, m]));
+      const normalizedWarehouses = {} as WarehouseStockMap;
+
+      for (const wh of WAREHOUSES) {
+        normalizedWarehouses[wh.id] = sortMeasureIdsByCatalog(payload.warehouses[wh.id], map);
+      }
+
+      setState((prev) => {
+        const changedWarehouses: WarehouseId[] = [];
+        const changedMeasureIds = new Set<string>();
+
+        for (const wh of WAREHOUSES) {
+          const prevList = prev.warehouses[wh.id];
+          const nextList = normalizedWarehouses[wh.id];
+          const isDifferent =
+            prevList.length !== nextList.length ||
+            prevList.some((id, idx) => nextList[idx] !== id);
+          if (isDifferent) {
+            changedWarehouses.push(wh.id);
+            nextList.forEach((id) => {
+              if (!prevList.includes(id)) changedMeasureIds.add(id);
+            });
+          }
+        }
+
+        const nextState: StockState = {
+          ...prev,
+          catalog: sortedCatalog,
+          warehouses: normalizedWarehouses,
+          shift: payload.shift,
+          lastUpdatedAt: confirmedAt,
+          lastVerifiedAt: confirmedAt,
+          revision: prev.revision + 1,
+        };
+
+        const affectedWarehouses =
+          changedWarehouses.length > 0 ? changedWarehouses : WAREHOUSES.map((w) => w.id);
+
+        transportRef.current.publish({
+          state: nextState,
+          meta: {
+            sourceTabId: TAB_ID,
+            action: 'verify',
+            affectedWarehouses,
+            affectedMeasureIds: Array.from(changedMeasureIds),
+            timestamp: confirmedAt,
+          },
+        });
+
+        return nextState;
+      });
+
+      return confirmedAt;
+    },
+    []
+  );
+
   const resetDemoStock = useCallback(() => {
     const allWh = WAREHOUSES.map((w) => w.id);
     commitState(
@@ -348,6 +419,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       addCustomCatalogMeasure,
       setShift,
       verifyStock,
+      confirmStockChanges,
       resetDemoStock,
       dismissPulse,
     }),
@@ -362,6 +434,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       addCustomCatalogMeasure,
       setShift,
       verifyStock,
+      confirmStockChanges,
       resetDemoStock,
       dismissPulse,
     ]

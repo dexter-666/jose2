@@ -21,6 +21,7 @@ describe('Stock por Balanza application', () => {
     expect(screen.queryByText(/estado actual de planta/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/productos siderúrgicos/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/sistema de control · stock por balanza/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/turno|última|\d{1,2}:\d{2}/i)).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /abrir editable almacén/i })).toHaveAttribute(
       'href',
       '/despachador'
@@ -36,31 +37,43 @@ describe('Stock por Balanza application', () => {
     render(<App />);
 
     expect(screen.getByText(/modo edición - despachador/i)).toBeInTheDocument();
+    expect(screen.getByText(/hora de modificación:/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 08' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 09' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - BAHIA' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - CURVA' })).toBeInTheDocument();
 
-    // Verify stock button confirms sync feedback
-    fireEvent.click(screen.getByRole('button', { name: /verificar \/ actualizar stock/i }));
-    expect(
-      screen.getByText(/stock verificado y sincronizado en tiempo real con balanza/i)
-    ).toBeInTheDocument();
-
-    // Add a measure in PT 08 via "+ Agregar medida"
+    // Add a measure in PT 08 via "+ Agregar medida" (staged until confirmed)
     const pt08Card = screen.getByRole('heading', { name: 'PT 08' }).closest('article')!;
     fireEvent.click(within(pt08Card).getByRole('button', { name: /agregar medida/i }));
     const optionBtn = within(pt08Card).getByRole('button', { name: /1" x 12 m/i });
     fireEvent.click(optionBtn);
 
     expect(within(pt08Card).getByRole('button', { name: /1" x 12 m/i })).toBeInTheDocument();
+    expect(screen.getByText(/cambios sin confirmar/i)).toBeInTheDocument();
+
+    // Not persisted to Balanza until Confirmado / Verificado is clicked
+    const beforeConfirm = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(beforeConfirm.warehouses.PT_08).not.toContain('1in_x_12_m');
+    expect(beforeConfirm.lastVerifiedAt).toBeNull();
+
+    // Bottom-right Confirmado / Verificado saves columns and stamps confirmation time
+    fireEvent.click(screen.getByRole('button', { name: /confirmado \/ verificado/i }));
+    expect(screen.getByText(/cambios guardados y confirmados hacia balanza/i)).toBeInTheDocument();
+    expect(screen.getByText(/sincronizado con balanza/i)).toBeInTheDocument();
+
+    const afterConfirm = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(afterConfirm.warehouses.PT_08).toContain('1in_x_12_m');
+    expect(afterConfirm.lastVerifiedAt).toBeTruthy();
   });
 
-  it('renders Balanza strictly read-only, filters on search, and syncs live from storage events', () => {
+  it('renders Balanza strictly read-only, shows Última modificación from confirmation, and syncs live', () => {
     window.history.pushState({}, '', '/balanza');
     render(<App />);
 
     expect(screen.getByText(/solo lectura/i)).toBeInTheDocument();
+    expect(screen.getByText(/última modificación:/i)).toBeInTheDocument();
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /agregar medida/i })).not.toBeInTheDocument();
     expect(screen.getAllByText(/tipos de medida/i)).toHaveLength(4);
 
@@ -70,10 +83,11 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByText(/disponible en:/i)).toBeInTheDocument();
     expect(screen.getAllByText('Disponible').length).toBeGreaterThanOrEqual(1);
 
-    // Simulate real-time update from Despachador tab via storage event
+    // Simulate confirmation from Despachador tab via storage event
     const current = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
     current.revision += 1;
     current.warehouses.PT_08 = ['6_mm', '1_2in_x_9_m'];
+    current.lastVerifiedAt = new Date(2026, 10, 10, 16, 55, 12).toISOString();
     const serialized = JSON.stringify(current);
     window.localStorage.setItem(STORAGE_KEY, serialized);
 
@@ -86,6 +100,7 @@ describe('Stock por Balanza application', () => {
       );
     });
 
+    expect(screen.getByText('04:55:12 PM')).toBeInTheDocument();
     const pt08Card = screen.getByRole('heading', { name: 'PT 08' }).closest('article')!;
     expect(within(pt08Card).getByText('1/2" x 9 m')).toBeInTheDocument();
     expect(within(pt08Card).queryByText('12 mm')).not.toBeInTheDocument();
@@ -103,7 +118,7 @@ describe('Stock por Balanza application', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /guardar medida/i }));
 
-    expect(screen.getByText(/medida "10 mm" agregada al catálogo/i)).toBeInTheDocument();
+    expect(screen.getByText(/medida "10 mm" agregada/i)).toBeInTheDocument();
     const pt08Card = screen.getByRole('heading', { name: 'PT 08' }).closest('article')!;
     const buttons = within(pt08Card)
       .getAllByRole('button')

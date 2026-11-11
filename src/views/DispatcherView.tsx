@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Clock,
   Edit3,
   Plus,
-  RefreshCw,
   RotateCcw,
   Ruler,
   Trash2,
@@ -13,22 +12,26 @@ import { CustomMeasureModal } from '../components/CustomMeasureModal/CustomMeasu
 import { MeasureDropdown } from '../components/MeasureDropdown/MeasureDropdown';
 import { ShiftSelectorDropdown } from '../components/ShiftSelectorDropdown/ShiftSelectorDropdown';
 import { useStock } from '../context/StockContext';
-import { WarehouseId } from '../types/stock';
-import { WAREHOUSES } from '../utils/measures';
-import { formatTimeShort } from '../utils/shifts';
+import { MeasureItem, ShiftCode, WarehouseId, WarehouseStockMap } from '../types/stock';
+import {
+  buildMeasureItem,
+  sortCatalogMeasures,
+  sortMeasureIdsByCatalog,
+  WAREHOUSES,
+} from '../utils/measures';
+import { formatTime12h } from '../utils/shifts';
 
 export function DispatcherView() {
-  const {
-    state,
-    addMeasureToWarehouse,
-    replaceMeasureInWarehouse,
-    removeMeasureFromWarehouse,
-    clearWarehouse,
-    addCustomCatalogMeasure,
-    setShift,
-    verifyStock,
-    resetDemoStock,
-  } = useStock();
+  const { state, confirmStockChanges, resetDemoStock } = useStock();
+
+  // Borrador editable en Despachador: los cambios se guardan y envían a Balanza al confirmar
+  const [draftCatalog, setDraftCatalog] = useState<MeasureItem[]>(() => state.catalog);
+  const [draftWarehouses, setDraftWarehouses] = useState<WarehouseStockMap>(() => state.warehouses);
+  const [draftShift, setDraftShift] = useState<ShiftCode>(() => state.shift);
+  const lastStateRevisionRef = useRef(state.revision);
+
+  // Reloj en tiempo real para "Hora de modificación"
+  const [liveNow, setLiveNow] = useState<Date>(() => new Date());
 
   const [pendingSlotWarehouse, setPendingSlotWarehouse] = useState<WarehouseId | null>(null);
   const [customModalWarehouse, setCustomModalWarehouse] = useState<WarehouseId | null>(null);
@@ -37,8 +40,35 @@ export function DispatcherView() {
   const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
+    const timer = window.setInterval(() => {
+      setLiveNow(new Date());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (draftShift !== state.shift) return true;
+    if (draftCatalog.length !== state.catalog.length) return true;
+    if (draftCatalog.some((m, i) => state.catalog[i]?.id !== m.id)) return true;
+    return WAREHOUSES.some((wh) => {
+      const a = draftWarehouses[wh.id];
+      const b = state.warehouses[wh.id];
+      return a.length !== b.length || a.some((id, idx) => b[idx] !== id);
+    });
+  }, [draftCatalog, draftShift, draftWarehouses, state.catalog, state.shift, state.warehouses]);
+
+  useEffect(() => {
+    if (state.revision !== lastStateRevisionRef.current) {
+      lastStateRevisionRef.current = state.revision;
+      setDraftCatalog(state.catalog);
+      setDraftWarehouses(state.warehouses);
+      setDraftShift(state.shift);
+    }
+  }, [state.catalog, state.revision, state.shift, state.warehouses]);
+
+  useEffect(() => {
     if (!feedbackMessage) return;
-    const t = window.setTimeout(() => setFeedbackMessage(null), 3200);
+    const t = window.setTimeout(() => setFeedbackMessage(null), 3500);
     return () => window.clearTimeout(t);
   }, [feedbackMessage]);
 
@@ -48,9 +78,100 @@ export function DispatcherView() {
     return () => window.clearTimeout(t);
   }, [confirmReset]);
 
-  const handleVerifyStock = () => {
-    verifyStock();
-    setFeedbackMessage('Stock verificado y sincronizado en tiempo real con Balanza.');
+  const draftCatalogMap = useMemo(
+    () => new Map<string, MeasureItem>(draftCatalog.map((m) => [m.id, m])),
+    [draftCatalog]
+  );
+
+  const handleAddMeasure = (warehouseId: WarehouseId, measureId: string) => {
+    setDraftWarehouses((prev) => ({
+      ...prev,
+      [warehouseId]: sortMeasureIdsByCatalog([...prev[warehouseId], measureId], draftCatalogMap),
+    }));
+  };
+
+  const handleReplaceMeasure = (
+    warehouseId: WarehouseId,
+    oldMeasureId: string,
+    newMeasureId: string
+  ) => {
+    if (oldMeasureId === newMeasureId) return;
+    setDraftWarehouses((prev) => {
+      const filtered = prev[warehouseId].filter((id) => id !== oldMeasureId);
+      return {
+        ...prev,
+        [warehouseId]: sortMeasureIdsByCatalog([...filtered, newMeasureId], draftCatalogMap),
+      };
+    });
+  };
+
+  const handleRemoveMeasure = (warehouseId: WarehouseId, measureId: string) => {
+    setDraftWarehouses((prev) => ({
+      ...prev,
+      [warehouseId]: prev[warehouseId].filter((id) => id !== measureId),
+    }));
+  };
+
+  const handleClearWarehouse = (warehouseId: WarehouseId) => {
+    setDraftWarehouses((prev) => ({
+      ...prev,
+      [warehouseId]: [],
+    }));
+  };
+
+  const handleCreateCustomMeasure = (
+    label: string,
+    options?: { overrideDiameterMm?: number; overrideLengthM?: number; autoAssignTo?: WarehouseId }
+  ): { ok: boolean; error?: string; measure?: MeasureItem } => {
+    const trimmed = label.trim().replace(/\s+/g, ' ');
+    if (!trimmed) {
+      return { ok: false, error: 'Ingresa el nombre de la medida (ej: 1 3/8" x 12 m o 16 mm).' };
+    }
+
+    const newMeasure = buildMeasureItem(trimmed, {
+      isCustom: true,
+      overrideDiameterMm: options?.overrideDiameterMm,
+      overrideLengthM: options?.overrideLengthM,
+    });
+
+    const duplicate = draftCatalog.find(
+      (m) => m.id === newMeasure.id || m.label.toLowerCase() === newMeasure.label.toLowerCase()
+    );
+    if (duplicate) {
+      return {
+        ok: false,
+        error: `La medida "${duplicate.label}" ya existe en el catálogo.`,
+      };
+    }
+
+    const nextCatalog = sortCatalogMeasures([...draftCatalog, newMeasure]);
+    const nextMap = new Map<string, MeasureItem>(nextCatalog.map((m) => [m.id, m]));
+    setDraftCatalog(nextCatalog);
+
+    if (options?.autoAssignTo) {
+      const targetWh = options.autoAssignTo;
+      setDraftWarehouses((prev) => ({
+        ...prev,
+        [targetWh]: sortMeasureIdsByCatalog([...prev[targetWh], newMeasure.id], nextMap),
+      }));
+    }
+
+    setFeedbackMessage(
+      `Medida "${newMeasure.label}" agregada. Presiona Confirmado / Verificado para enviar a Balanza.`
+    );
+    return { ok: true, measure: newMeasure };
+  };
+
+  const handleConfirmChanges = () => {
+    const confirmedIso = confirmStockChanges({
+      catalog: draftCatalog,
+      warehouses: draftWarehouses,
+      shift: draftShift,
+    });
+    setPendingSlotWarehouse(null);
+    setFeedbackMessage(
+      `Cambios guardados y confirmados hacia Balanza (${formatTime12h(confirmedIso)}).`
+    );
   };
 
   const openCustomModal = (warehouseId?: WarehouseId) => {
@@ -73,36 +194,37 @@ export function DispatcherView() {
                   <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
                   Modo Edición - Despachador
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                  Guardado automático activo
-                </span>
+                {hasUnsavedChanges ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sider-amber-soft px-3 py-1 text-xs font-bold text-amber-900">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-sider-amber" />
+                    Cambios sin confirmar
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Sincronizado con Balanza
+                  </span>
+                )}
               </div>
 
               <h1 className="mt-2.5 text-xl font-extrabold text-slate-900 sm:text-2xl">
                 Gestión de Medidas Disponibles por Almacén
               </h1>
-              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-600 sm:text-sm">
-                <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+
+              {/* Reloj en tiempo real */}
+              <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
+                <Clock className="h-4 w-4 text-gerdau" aria-hidden="true" />
                 <span>
-                  Último cambio:{' '}
-                  <strong className="font-mono text-slate-800">
-                    {formatTimeShort(state.lastUpdatedAt)}
+                  Hora de modificación:{' '}
+                  <strong className="font-mono text-sm font-extrabold text-gerdau sm:text-base">
+                    {formatTime12h(liveNow)}
                   </strong>
                 </span>
-                {state.lastVerifiedAt && (
-                  <>
-                    <span>· Verificado:</span>
-                    <strong className="font-mono text-emerald-700">
-                      {formatTimeShort(state.lastVerifiedAt)}
-                    </strong>
-                  </>
-                )}
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              <ShiftSelectorDropdown shift={state.shift} onChange={setShift} />
+              <ShiftSelectorDropdown shift={draftShift} onChange={setDraftShift} />
 
               <button
                 type="button"
@@ -111,15 +233,6 @@ export function DispatcherView() {
               >
                 <Ruler className="h-4 w-4" aria-hidden="true" />
                 Nueva medida
-              </button>
-
-              <button
-                type="button"
-                onClick={handleVerifyStock}
-                className="inline-flex items-center gap-2 rounded-lg bg-sider-red px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-sider-red-dark active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red focus-visible:ring-offset-2 sm:text-sm"
-              >
-                <RefreshCw className="h-4 w-4 text-sider-amber" aria-hidden="true" />
-                Verificar / Actualizar Stock
               </button>
 
               {confirmReset ? (
@@ -166,9 +279,9 @@ export function DispatcherView() {
           className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
         >
           {WAREHOUSES.map((wh) => {
-            const assignedIds = state.warehouses[wh.id];
+            const assignedIds = draftWarehouses[wh.id];
             const isPendingHere = pendingSlotWarehouse === wh.id;
-            const remainingCatalogCount = state.catalog.length - assignedIds.length;
+            const remainingCatalogCount = draftCatalog.length - assignedIds.length;
             const isBlue = wh.accent === 'blue';
 
             return (
@@ -197,7 +310,7 @@ export function DispatcherView() {
                   {assignedIds.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => clearWarehouse(wh.id)}
+                      onClick={() => handleClearWarehouse(wh.id)}
                       className="text-slate-500 underline-offset-2 transition-colors hover:text-sider-red hover:underline"
                     >
                       Limpiar
@@ -225,12 +338,12 @@ export function DispatcherView() {
                         >
                           <div className="min-w-0 flex-1">
                             <MeasureDropdown
-                              catalog={state.catalog}
+                              catalog={draftCatalog}
                               selectedMeasureId={measureId}
                               usedMeasureIdsInColumn={assignedIds}
                               variant={isBlue ? 'blue' : 'red'}
                               onSelect={(newId) =>
-                                replaceMeasureInWarehouse(wh.id, measureId, newId)
+                                handleReplaceMeasure(wh.id, measureId, newId)
                               }
                               onRequestCustomMeasure={() => openCustomModal(wh.id)}
                             />
@@ -238,7 +351,7 @@ export function DispatcherView() {
 
                           <button
                             type="button"
-                            onClick={() => removeMeasureFromWarehouse(wh.id, measureId)}
+                            onClick={() => handleRemoveMeasure(wh.id, measureId)}
                             title="Eliminar / Producto agotado"
                             aria-label={`Quitar medida de ${wh.label}`}
                             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-surface-border bg-white text-slate-500 transition-colors hover:border-sider-red/40 hover:bg-sider-red-soft hover:text-sider-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red"
@@ -252,14 +365,14 @@ export function DispatcherView() {
                         <div className="flex items-center gap-2 rounded-xl border-2 border-dashed border-sider-amber bg-sider-amber-soft/50 p-2">
                           <div className="min-w-0 flex-1">
                             <MeasureDropdown
-                              catalog={state.catalog}
+                              catalog={draftCatalog}
                               selectedMeasureId={null}
                               usedMeasureIdsInColumn={assignedIds}
                               variant={isBlue ? 'blue' : 'red'}
                               placeholder="Elegir medida..."
                               autoOpen
                               onSelect={(newId) => {
-                                addMeasureToWarehouse(wh.id, newId);
+                                handleAddMeasure(wh.id, newId);
                                 setPendingSlotWarehouse(null);
                               }}
                               onRequestCustomMeasure={() => {
@@ -307,19 +420,42 @@ export function DispatcherView() {
             );
           })}
         </section>
+
+        {/* Botón de Confirmación / Verificación en la parte inferior derecha */}
+        <div className="mt-6 flex flex-col items-end justify-between gap-3 rounded-2xl border border-surface-border bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center">
+          <div className="text-xs font-medium text-slate-600 sm:text-sm">
+            {hasUnsavedChanges ? (
+              <span className="font-semibold text-amber-800">
+                Tienes cambios pendientes por confirmar hacia Balanza.
+              </span>
+            ) : state.lastVerifiedAt ? (
+              <span>
+                Última confirmación enviada a Balanza:{' '}
+                <strong className="font-mono text-slate-900">
+                  {formatTime12h(state.lastVerifiedAt)}
+                </strong>
+              </span>
+            ) : (
+              <span>Presiona el botón para guardar y registrar la hora en Balanza.</span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleConfirmChanges}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-extrabold text-white shadow-md transition-all hover:bg-emerald-700 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+          >
+            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            Confirmado / Verificado
+          </button>
+        </div>
       </div>
 
       <CustomMeasureModal
         isOpen={isCustomModalOpen}
         defaultWarehouseId={customModalWarehouse}
         onClose={() => setIsCustomModalOpen(false)}
-        onCreate={(label, options) => {
-          const result = addCustomCatalogMeasure(label, options);
-          if (result.ok && result.measure) {
-            setFeedbackMessage(`Medida "${result.measure.label}" agregada al catálogo en orden.`);
-          }
-          return result;
-        }}
+        onCreate={handleCreateCustomMeasure}
       />
     </main>
   );

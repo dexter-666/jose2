@@ -17,16 +17,21 @@ export function getShiftOption(code: ShiftCode): ShiftOption {
   return SHIFT_OPTIONS.find((s) => s.code === code) ?? SHIFT_OPTIONS[0];
 }
 
-export function formatTimeShort(isoString: string | null): string {
-  if (!isoString) return 'Pendiente';
-  const date = new Date(isoString);
+export function formatTime12h(input: Date | string | null): string {
+  if (!input) return 'Pendiente';
+  const date = typeof input === 'string' ? new Date(input) : input;
   if (Number.isNaN(date.getTime())) return 'Pendiente';
-  return date.toLocaleTimeString('es-PE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  });
+  const hours24 = date.getHours();
+  const period = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = hours24 % 12 || 12;
+  const hh = String(hours12).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${hh}:${mm}:${ss} ${period}`;
+}
+
+export function formatTimeShort(isoString: string | null): string {
+  return formatTime12h(isoString);
 }
 
 export function formatDateTimeCompact(isoString: string | null): string {
