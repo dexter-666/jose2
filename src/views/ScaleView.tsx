@@ -160,13 +160,13 @@ export function ScaleView() {
                   {recentPulse.action === 'verify'
                     ? 'Stock confirmado por Despacho'
                     : 'Actualización recibida desde Despacho en tiempo real'}
-                  {recentPulse.affectedWarehouses.length > 0 &&
-                    recentPulse.affectedWarehouses.length < 4 && (
+                  {(recentPulse.affectedWarehouses?.length ?? 0) > 0 &&
+                    (recentPulse.affectedWarehouses?.length ?? 0) < 4 && (
                       <>
                         {' '}
                         ·{' '}
                         {WAREHOUSES.filter((w) =>
-                          recentPulse.affectedWarehouses.includes(w.id)
+                          recentPulse.affectedWarehouses?.includes(w.id)
                         )
                           .map((w) => w.label)
                           .join(', ')}
@@ -248,7 +248,7 @@ export function ScaleView() {
               const matchCount = info.matchingIds.size;
               const isHighlightedColumn = hasQuery && matchCount > 0;
               const isDimmedColumn = hasQuery && matchCount === 0;
-              const isPulsingColumn = recentPulse?.affectedWarehouses.includes(wh.id) ?? false;
+              const isPulsingColumn = recentPulse?.affectedWarehouses?.includes(wh.id) ?? false;
               const isDarkOrange = wh.accent === 'blue';
 
               return (
@@ -305,10 +305,11 @@ export function ScaleView() {
                       <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>
                         {info.allMeasures.map((measure) => {
                           const isMatch = hasQuery && info.matchingIds.has(measure.id);
+                          const affectedMeasureIds = recentPulse?.affectedMeasureIds ?? [];
                           const isPulsingItem =
                             isPulsingColumn &&
-                            (recentPulse?.affectedMeasureIds.length === 0 ||
-                              recentPulse?.affectedMeasureIds.includes(measure.id));
+                            (affectedMeasureIds.length === 0 ||
+                              affectedMeasureIds.includes(measure.id));
 
                           return (
                             <li

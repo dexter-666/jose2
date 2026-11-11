@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { normalizeRemoteMeta } from './firebaseSync';
 import { createInitialStockState, sanitizeStockState } from './stockSync';
 
 describe('stockSync sanitization for Firebase / remote storage', () => {
@@ -41,4 +42,21 @@ describe('stockSync sanitization for Firebase / remote storage', () => {
     expect(clean!.warehouses.PT_15_BAHIA).toEqual([]);
     expect(clean!.warehouses.PT_15_CURVA).toEqual([]);
   });
+
+  it('normalizes Firebase meta when empty arrays were stripped to undefined', () => {
+    const normalized = normalizeRemoteMeta(
+      {
+        sourceTabId: 'other-browser',
+        action: 'verify',
+        affectedWarehouses: { '0': 'PT_08' },
+        // affectedMeasureIds omitted by Firebase because it was []
+      },
+      '2026-11-11T11:00:00.000Z'
+    );
+
+    expect(normalized).not.toBeNull();
+    expect(normalized!.affectedWarehouses).toEqual(['PT_08']);
+    expect(normalized!.affectedMeasureIds).toEqual([]);
+  });
 });
+

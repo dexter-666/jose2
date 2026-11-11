@@ -62,6 +62,40 @@ function toFirebaseSafeJson<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string');
+  }
+  if (value && typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).filter(
+      (item): item is string => typeof item === 'string'
+    );
+  }
+  return [];
+}
+
+export function normalizeRemoteMeta(
+  rawMeta: unknown,
+  fallbackTimestamp: string
+): StockChangeMetadata | null {
+  if (!rawMeta || typeof rawMeta !== 'object') return null;
+  const candidate = rawMeta as Partial<StockChangeMetadata>;
+  return {
+    sourceTabId: typeof candidate.sourceTabId === 'string' ? candidate.sourceTabId : 'remote',
+    action:
+      candidate.action === 'verify' ||
+      candidate.action === 'reset' ||
+      candidate.action === 'catalog_add' ||
+      candidate.action === 'update'
+        ? candidate.action
+        : 'verify',
+    affectedWarehouses: toStringArray(candidate.affectedWarehouses) as StockChangeMetadata['affectedWarehouses'],
+    affectedMeasureIds: toStringArray(candidate.affectedMeasureIds),
+    timestamp:
+      typeof candidate.timestamp === 'string' ? candidate.timestamp : fallbackTimestamp,
+  };
+}
+
 export function subscribeFirebaseStockState(
   onUpdate: (record: FirebaseStockRecord) => void,
   onError?: (error: Error) => void
@@ -93,7 +127,7 @@ export function subscribeFirebaseStockState(
 
       onUpdate({
         state: cleanState,
-        meta: rawVal.meta ?? null,
+        meta: normalizeRemoteMeta(rawVal.meta, cleanState.lastUpdatedAt),
       });
     },
     (err) => {
@@ -114,3 +148,4 @@ export async function pushFirebaseStockState(envelope: SyncEnvelope): Promise<vo
   });
   await set(stockRef, payload);
 }
+

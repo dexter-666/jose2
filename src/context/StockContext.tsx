@@ -93,10 +93,10 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     }
     setRecentPulse({
       pulseKey: Date.now(),
-      action: meta.action,
-      affectedWarehouses: meta.affectedWarehouses,
-      affectedMeasureIds: meta.affectedMeasureIds,
-      timestamp: meta.timestamp,
+      action: meta.action ?? 'verify',
+      affectedWarehouses: Array.isArray(meta.affectedWarehouses) ? meta.affectedWarehouses : [],
+      affectedMeasureIds: Array.isArray(meta.affectedMeasureIds) ? meta.affectedMeasureIds : [],
+      timestamp: meta.timestamp ?? new Date().toISOString(),
     });
     pulseTimeoutRef.current = window.setTimeout(() => {
       setRecentPulse(null);
@@ -157,6 +157,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
         if (
           !isInitialSnapshot &&
           remoteState.revision <= stateRef.current.revision &&
+          remoteState.lastUpdatedAt === stateRef.current.lastUpdatedAt &&
           remoteState.lastVerifiedAt === stateRef.current.lastVerifiedAt
         ) {
           return;

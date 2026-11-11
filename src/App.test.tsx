@@ -185,4 +185,76 @@ describe('Stock por Balanza application', () => {
     expect(within(pt09Card).getByText('1/2" x 9 m')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/api/stock', expect.objectContaining({ method: 'GET' }));
   });
+
+  it('does not crash Balanza when remote sync meta omits empty arrays', async () => {
+    const firstConfirmedIso = new Date(2026, 10, 11, 11, 10, 0).toISOString();
+    const secondConfirmedIso = new Date(2026, 10, 11, 11, 15, 0).toISOString();
+
+    const baseState = {
+      version: 1,
+      catalog: [
+        { id: '6_mm', label: '6 mm', diameterMm: 6, lengthM: 0 },
+        { id: '8_mm', label: '8 mm', diameterMm: 8, lengthM: 0 },
+      ],
+      warehouses: {
+        PT_08: ['6_mm'],
+        PT_09: ['8_mm'],
+        PT_15_BAHIA: [],
+        PT_15_CURVA: [],
+      },
+      shift: '07:00',
+      lastUpdatedAt: firstConfirmedIso,
+      lastVerifiedAt: firstConfirmedIso,
+      revision: 2,
+    };
+
+    let pollCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      pollCount += 1;
+      if (pollCount === 1) {
+        return new Response(
+          JSON.stringify({ configured: true, unchanged: false, state: baseState, meta: null }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          configured: true,
+          unchanged: false,
+          state: {
+            ...baseState,
+            warehouses: { ...baseState.warehouses, PT_08: [] },
+            lastUpdatedAt: secondConfirmedIso,
+            lastVerifiedAt: secondConfirmedIso,
+            revision: 3,
+          },
+          // Simulate Firebase/remote payload missing affectedMeasureIds
+          meta: {
+            sourceTabId: 'remote-tab',
+            action: 'verify',
+            affectedWarehouses: ['PT_08'],
+            timestamp: secondConfirmedIso,
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+
+    window.history.pushState({}, '', '/balanza');
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('11:10:00 AM')).toBeInTheDocument();
+    });
+
+    // Trigger visibilitychange so second remote snapshot with omitted affectedMeasureIds arrives
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('11:15:00 AM')).toBeInTheDocument();
+      expect(screen.getByText(/stock confirmado por despacho/i)).toBeInTheDocument();
+    });
+  });
 });
