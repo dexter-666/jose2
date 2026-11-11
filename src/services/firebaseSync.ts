@@ -138,6 +138,26 @@ export function subscribeFirebaseStockState(
   return unsubscribe;
 }
 
+export function subscribeFirebaseConnection(
+  onChange: (connected: boolean) => void
+): () => void {
+  if (!isFirebaseConfigured()) {
+    onChange(false);
+    return () => {};
+  }
+  const db = getStockDb();
+  const connectedRef = ref(db, '.info/connected');
+  return onValue(
+    connectedRef,
+    (snapshot) => {
+      onChange(snapshot.val() === true);
+    },
+    () => {
+      onChange(false);
+    }
+  );
+}
+
 export async function pushFirebaseStockState(envelope: SyncEnvelope): Promise<void> {
   if (!isFirebaseConfigured()) return;
   const db = getStockDb();

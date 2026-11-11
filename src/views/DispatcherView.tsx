@@ -8,6 +8,7 @@ import {
   Ruler,
   Trash2,
 } from 'lucide-react';
+import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { CustomMeasureModal } from '../components/CustomMeasureModal/CustomMeasureModal';
 import { MeasureDropdown } from '../components/MeasureDropdown/MeasureDropdown';
 import { useStock } from '../context/StockContext';
@@ -21,7 +22,7 @@ import {
 import { formatTime12h } from '../utils/shifts';
 
 export function DispatcherView() {
-  const { state, syncMode, confirmStockChanges, resetDemoStock } = useStock();
+  const { state, isConnected, confirmStockChanges, resetDemoStock } = useStock();
 
   // Borrador editable en Despachador: los cambios se guardan y envían a Balanza al confirmar
   const [draftCatalog, setDraftCatalog] = useState<MeasureItem[]>(() => state.catalog);
@@ -190,19 +191,11 @@ export function DispatcherView() {
                   <Edit3 className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
                   Modo Edición - Despachador
                 </span>
-                {hasUnsavedChanges ? (
+                <ConnectionDot connected={isConnected} />
+                {hasUnsavedChanges && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-800">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-orange-500" />
                     Cambios sin confirmar
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
-                    <span className="h-2 w-2 rounded-full bg-orange-500" />
-                    {syncMode === 'cloud-firebase'
-                      ? 'Firebase en vivo · Multi-dispositivo'
-                      : syncMode === 'cloud-redis'
-                        ? 'Nube activa · Multi-dispositivo'
-                        : 'Sincronizado con Balanza'}
                   </span>
                 )}
               </div>

@@ -16,6 +16,7 @@ import {
 import {
   isFirebaseConfigured,
   pushFirebaseStockState,
+  subscribeFirebaseConnection,
   subscribeFirebaseStockState,
 } from '../services/firebaseSync';
 import {
@@ -43,6 +44,7 @@ interface StockContextValue {
   catalogMap: Map<string, MeasureItem>;
   recentPulse: RecentPulseState | null;
   syncMode: SyncMode;
+  isConnected: boolean;
   addMeasureToWarehouse: (warehouseId: WarehouseId, measureId: string) => void;
   replaceMeasureInWarehouse: (
     warehouseId: WarehouseId,
@@ -76,6 +78,11 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
   const [syncMode, setSyncMode] = useState<SyncMode>(() =>
     firebaseEnabled ? 'cloud-firebase' : 'local-browser'
   );
+  const [browserOnline, setBrowserOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+  const [firebaseConnected, setFirebaseConnected] = useState<boolean>(false);
+  const [redisReachable, setRedisReachable] = useState<boolean>(true);
   const [recentPulse, setRecentPulse] = useState<RecentPulseState | null>(null);
 
   const stateRef = useRef<StockState>(state);
@@ -108,8 +115,14 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       if (isPublishingRef.current) return;
       const sinceRev = isInitial ? undefined : stateRef.current.revision;
       const result = await fetchRemoteStockState(sinceRev);
-      if (!result) return;
+      if (!result) {
+        if (!isInitial) {
+          setRedisReachable(false);
+        }
+        return;
+      }
 
+      setRedisReachable(true);
       if (!result.configured) {
         setSyncMode('local-browser');
         return;
@@ -139,6 +152,11 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    const handleOnline = () => setBrowserOnline(true);
+    const handleOffline = () => setBrowserOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     const transport = transportRef.current;
     const unsubscribeLocal = transport.subscribe((envelope: SyncEnvelope) => {
       stateRef.current = envelope.state;
@@ -148,6 +166,9 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
 
     if (firebaseEnabled) {
       setSyncMode('cloud-firebase');
+      const unsubscribeConnection = subscribeFirebaseConnection((connected) => {
+        setFirebaseConnected(connected);
+      });
       const unsubscribeFirebase = subscribeFirebaseStockState(({ state: remoteState, meta }) => {
         const isInitialSnapshot = !hasSeenFirebaseSnapshotRef.current;
         hasSeenFirebaseSnapshotRef.current = true;
@@ -173,7 +194,10 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       });
 
       return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
         unsubscribeLocal();
+        unsubscribeConnection();
         unsubscribeFirebase();
         if (pulseTimeoutRef.current !== null) {
           window.clearTimeout(pulseTimeoutRef.current);
@@ -205,6 +229,8 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     }, CLOUD_POLL_INTERVAL_MS);
 
     return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       unsubscribeLocal();
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
       window.removeEventListener('focus', handleVisibilityOrFocus);
@@ -545,12 +571,21 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     setRecentPulse(null);
   }, []);
 
+  const isConnected =
+    browserOnline &&
+    (syncMode === 'cloud-firebase'
+      ? firebaseConnected
+      : syncMode === 'cloud-redis'
+        ? redisReachable
+        : true);
+
   const value = useMemo<StockContextValue>(
     () => ({
       state,
       catalogMap,
       recentPulse,
       syncMode,
+      isConnected,
       addMeasureToWarehouse,
       replaceMeasureInWarehouse,
       removeMeasureFromWarehouse,
@@ -567,6 +602,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       catalogMap,
       recentPulse,
       syncMode,
+      isConnected,
       addMeasureToWarehouse,
       replaceMeasureInWarehouse,
       removeMeasureFromWarehouse,

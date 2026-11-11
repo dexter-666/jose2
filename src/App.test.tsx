@@ -65,7 +65,17 @@ describe('Stock por Balanza application', () => {
     // Bottom-right Confirmado / Verificado saves columns and stamps confirmation time
     fireEvent.click(screen.getByRole('button', { name: /confirmado \/ verificado/i }));
     expect(screen.getByText(/cambios guardados y confirmados hacia balanza/i)).toBeInTheDocument();
-    expect(screen.getByText(/sincronizado con balanza/i)).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Conectado' })).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event('offline'));
+    });
+    expect(screen.getByRole('status', { name: 'Sin conexión' })).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event('online'));
+    });
+    expect(screen.getByRole('status', { name: 'Conectado' })).toBeInTheDocument();
 
     const afterConfirm = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
     expect(afterConfirm.warehouses.PT_08).toContain('1in_x_12_m');
@@ -180,7 +190,7 @@ describe('Stock por Balanza application', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText(/sincronizado en la nube/i)).toBeInTheDocument();
+      expect(screen.getByRole('status', { name: 'Conectado' })).toBeInTheDocument();
       expect(screen.getByText('05:15:30 PM')).toBeInTheDocument();
     });
 

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Filter, Lock, Radio, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Filter, Lock, Search, X } from 'lucide-react';
+import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
@@ -9,7 +10,7 @@ import { formatTime12h } from '../utils/shifts';
 const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4', '1"'] as const;
 
 export function ScaleView() {
-  const { state, catalogMap, syncMode, recentPulse, dismissPulse } = useStock();
+  const { state, catalogMap, isConnected, recentPulse, dismissPulse } = useStock();
   const [searchQuery, setSearchQuery] = useState('');
   const [hideNonMatchingColumns, setHideNonMatchingColumns] = useState(false);
 
@@ -69,14 +70,7 @@ export function ScaleView() {
                   <Lock className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
                   Solo Lectura · Monitor Balanza
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
-                  <Radio className="h-3.5 w-3.5 animate-pulse text-orange-600" aria-hidden="true" />
-                  {syncMode === 'cloud-firebase'
-                    ? 'Firebase en vivo · Tiempo real'
-                    : syncMode === 'cloud-redis'
-                      ? 'Sincronizado en la nube'
-                      : 'Sincronizado en vivo'}
-                </span>
+                <ConnectionDot connected={isConnected} />
               </div>
 
               <h1 className="sr-only">Monitor de Balanza</h1>
