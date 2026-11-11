@@ -9,7 +9,7 @@ import { formatTime12h } from '../utils/shifts';
 const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4', '1"'] as const;
 
 export function ScaleView() {
-  const { state, catalogMap, recentPulse, dismissPulse } = useStock();
+  const { state, catalogMap, syncMode, recentPulse, dismissPulse } = useStock();
   const [searchQuery, setSearchQuery] = useState('');
   const [hideNonMatchingColumns, setHideNonMatchingColumns] = useState(false);
 
@@ -71,7 +71,9 @@ export function ScaleView() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
                   <Radio className="h-3.5 w-3.5 animate-pulse text-orange-600" aria-hidden="true" />
-                  Sincronizado en vivo
+                  {syncMode === 'cloud-redis'
+                    ? 'Sincronizado en la nube'
+                    : 'Sincronizado en vivo'}
                 </span>
               </div>
 

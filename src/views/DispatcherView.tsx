@@ -21,7 +21,7 @@ import {
 import { formatTime12h } from '../utils/shifts';
 
 export function DispatcherView() {
-  const { state, confirmStockChanges, resetDemoStock } = useStock();
+  const { state, syncMode, confirmStockChanges, resetDemoStock } = useStock();
 
   // Borrador editable en Despachador: los cambios se guardan y envían a Balanza al confirmar
   const [draftCatalog, setDraftCatalog] = useState<MeasureItem[]>(() => state.catalog);
@@ -198,7 +198,9 @@ export function DispatcherView() {
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
                     <span className="h-2 w-2 rounded-full bg-orange-500" />
-                    Sincronizado con Balanza
+                    {syncMode === 'cloud-redis'
+                      ? 'Nube activa · Multi-dispositivo'
+                      : 'Sincronizado con Balanza'}
                   </span>
                 )}
               </div>

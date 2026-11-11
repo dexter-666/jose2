@@ -16,8 +16,12 @@ import {
 import {
   createBrowserSyncTransport,
   createInitialStockState,
+  fetchRemoteStockState,
   loadPersistedStockState,
+  pushRemoteStockState,
+  savePersistedStockState,
   SyncEnvelope,
+  SyncMode,
   TAB_ID,
 } from '../services/stockSync';
 
@@ -33,7 +37,7 @@ interface StockContextValue {
   state: StockState;
   catalogMap: Map<string, MeasureItem>;
   recentPulse: RecentPulseState | null;
-  syncMode: 'local-browser';
+  syncMode: SyncMode;
   addMeasureToWarehouse: (warehouseId: WarehouseId, measureId: string) => void;
   replaceMeasureInWarehouse: (
     warehouseId: WarehouseId,
@@ -57,13 +61,22 @@ interface StockContextValue {
   dismissPulse: () => void;
 }
 
+const CLOUD_POLL_INTERVAL_MS = 3000;
+
 const StockContext = createContext<StockContextValue | null>(null);
 
 export function StockProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<StockState>(() => loadPersistedStockState());
+  const [syncMode, setSyncMode] = useState<SyncMode>('local-browser');
   const [recentPulse, setRecentPulse] = useState<RecentPulseState | null>(null);
+
+  const stateRef = useRef<StockState>(state);
+  stateRef.current = state;
+
   const transportRef = useRef(createBrowserSyncTransport());
   const pulseTimeoutRef = useRef<number | null>(null);
+  const isPublishingRef = useRef(false);
+  const hasLocalCommitRef = useRef(false);
 
   const triggerPulse = useCallback((meta: StockChangeMetadata) => {
     if (pulseTimeoutRef.current !== null) {
@@ -81,54 +94,126 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     }, 3200);
   }, []);
 
+  const syncFromCloud = useCallback(
+    async (isInitial: boolean) => {
+      if (isPublishingRef.current) return;
+      const sinceRev = isInitial ? undefined : stateRef.current.revision;
+      const result = await fetchRemoteStockState(sinceRev);
+      if (!result) return;
+
+      if (!result.configured) {
+        setSyncMode('local-browser');
+        return;
+      }
+
+      setSyncMode('cloud-redis');
+
+      if (result.unchanged || !result.state) return;
+
+      // Avoid overwriting a user action that happened while initial fetch was in flight
+      if (isInitial && hasLocalCommitRef.current) return;
+
+      const remoteState = result.state;
+      if (!isInitial && remoteState.revision <= stateRef.current.revision) {
+        return;
+      }
+
+      stateRef.current = remoteState;
+      setState(remoteState);
+      savePersistedStockState(remoteState);
+
+      if (!isInitial && result.meta && result.meta.sourceTabId !== TAB_ID) {
+        triggerPulse(result.meta);
+      }
+    },
+    [triggerPulse]
+  );
+
   useEffect(() => {
     const transport = transportRef.current;
     const unsubscribe = transport.subscribe((envelope: SyncEnvelope) => {
+      stateRef.current = envelope.state;
       setState(envelope.state);
       triggerPulse(envelope.meta);
     });
 
-    // Reconcile on tab focus in case browser throttled background timers/events
-    const handleVisibility = () => {
+    // Initial cloud sync check (upgrades to 'cloud-redis' automatically if configured on Vercel)
+    void syncFromCloud(true);
+
+    const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
         const persisted = loadPersistedStockState();
-        setState((prev) => (persisted.revision > prev.revision ? persisted : prev));
+        if (persisted.revision > stateRef.current.revision) {
+          stateRef.current = persisted;
+          setState(persisted);
+        }
+        void syncFromCloud(false);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
+
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+
+    const pollTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void syncFromCloud(false);
+      }
+    }, CLOUD_POLL_INTERVAL_MS);
 
     return () => {
       unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibility);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.clearInterval(pollTimer);
       if (pulseTimeoutRef.current !== null) {
         window.clearTimeout(pulseTimeoutRef.current);
       }
     };
-  }, [triggerPulse]);
+  }, [syncFromCloud, triggerPulse]);
+
+  const publishEnvelope = useCallback(async (envelope: SyncEnvelope) => {
+    hasLocalCommitRef.current = true;
+    stateRef.current = envelope.state;
+    setState(envelope.state);
+    transportRef.current.publish(envelope);
+
+    isPublishingRef.current = true;
+    try {
+      const remoteResult = await pushRemoteStockState(envelope);
+      if (remoteResult?.configured) {
+        setSyncMode('cloud-redis');
+        if (remoteResult.ok && remoteResult.state) {
+          stateRef.current = remoteResult.state;
+          setState(remoteResult.state);
+          savePersistedStockState(remoteResult.state);
+        }
+      }
+    } finally {
+      isPublishingRef.current = false;
+    }
+  }, []);
 
   const commitState = useCallback(
     (
       updater: (prev: StockState) => StockState,
       metaInput: Omit<StockChangeMetadata, 'sourceTabId' | 'timestamp'>
     ) => {
-      setState((prev) => {
-        const now = new Date().toISOString();
-        const nextBase = updater(prev);
-        const nextState: StockState = {
-          ...nextBase,
-          lastUpdatedAt: now,
-          revision: prev.revision + 1,
-        };
-        const meta: StockChangeMetadata = {
-          ...metaInput,
-          sourceTabId: TAB_ID,
-          timestamp: now,
-        };
-        transportRef.current.publish({ state: nextState, meta });
-        return nextState;
-      });
+      const prev = stateRef.current;
+      const now = new Date().toISOString();
+      const nextBase = updater(prev);
+      const nextState: StockState = {
+        ...nextBase,
+        lastUpdatedAt: now,
+        revision: prev.revision + 1,
+      };
+      const meta: StockChangeMetadata = {
+        ...metaInput,
+        sourceTabId: TAB_ID,
+        timestamp: now,
+      };
+      void publishEnvelope({ state: nextState, meta });
     },
-    []
+    [publishEnvelope]
   );
 
   const catalogMap = useMemo(
@@ -325,6 +410,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       warehouses: WarehouseStockMap;
       shift: ShiftCode;
     }): string => {
+      const prev = stateRef.current;
       const confirmedAt = new Date().toISOString();
       const sortedCatalog = sortCatalogMeasures(payload.catalog);
       const map = new Map<string, MeasureItem>(sortedCatalog.map((m) => [m.id, m]));
@@ -334,54 +420,50 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
         normalizedWarehouses[wh.id] = sortMeasureIdsByCatalog(payload.warehouses[wh.id], map);
       }
 
-      setState((prev) => {
-        const changedWarehouses: WarehouseId[] = [];
-        const changedMeasureIds = new Set<string>();
+      const changedWarehouses: WarehouseId[] = [];
+      const changedMeasureIds = new Set<string>();
 
-        for (const wh of WAREHOUSES) {
-          const prevList = prev.warehouses[wh.id];
-          const nextList = normalizedWarehouses[wh.id];
-          const isDifferent =
-            prevList.length !== nextList.length ||
-            prevList.some((id, idx) => nextList[idx] !== id);
-          if (isDifferent) {
-            changedWarehouses.push(wh.id);
-            nextList.forEach((id) => {
-              if (!prevList.includes(id)) changedMeasureIds.add(id);
-            });
-          }
+      for (const wh of WAREHOUSES) {
+        const prevList = prev.warehouses[wh.id];
+        const nextList = normalizedWarehouses[wh.id];
+        const isDifferent =
+          prevList.length !== nextList.length ||
+          prevList.some((id, idx) => nextList[idx] !== id);
+        if (isDifferent) {
+          changedWarehouses.push(wh.id);
+          nextList.forEach((id) => {
+            if (!prevList.includes(id)) changedMeasureIds.add(id);
+          });
         }
+      }
 
-        const nextState: StockState = {
-          ...prev,
-          catalog: sortedCatalog,
-          warehouses: normalizedWarehouses,
-          shift: payload.shift,
-          lastUpdatedAt: confirmedAt,
-          lastVerifiedAt: confirmedAt,
-          revision: prev.revision + 1,
-        };
+      const nextState: StockState = {
+        ...prev,
+        catalog: sortedCatalog,
+        warehouses: normalizedWarehouses,
+        shift: payload.shift,
+        lastUpdatedAt: confirmedAt,
+        lastVerifiedAt: confirmedAt,
+        revision: prev.revision + 1,
+      };
 
-        const affectedWarehouses =
-          changedWarehouses.length > 0 ? changedWarehouses : WAREHOUSES.map((w) => w.id);
+      const affectedWarehouses =
+        changedWarehouses.length > 0 ? changedWarehouses : WAREHOUSES.map((w) => w.id);
 
-        transportRef.current.publish({
-          state: nextState,
-          meta: {
-            sourceTabId: TAB_ID,
-            action: 'verify',
-            affectedWarehouses,
-            affectedMeasureIds: Array.from(changedMeasureIds),
-            timestamp: confirmedAt,
-          },
-        });
-
-        return nextState;
+      void publishEnvelope({
+        state: nextState,
+        meta: {
+          sourceTabId: TAB_ID,
+          action: 'verify',
+          affectedWarehouses,
+          affectedMeasureIds: Array.from(changedMeasureIds),
+          timestamp: confirmedAt,
+        },
       });
 
       return confirmedAt;
     },
-    []
+    [publishEnvelope]
   );
 
   const resetDemoStock = useCallback(() => {
@@ -411,7 +493,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       state,
       catalogMap,
       recentPulse,
-      syncMode: 'local-browser',
+      syncMode,
       addMeasureToWarehouse,
       replaceMeasureInWarehouse,
       removeMeasureFromWarehouse,
@@ -427,6 +509,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       state,
       catalogMap,
       recentPulse,
+      syncMode,
       addMeasureToWarehouse,
       replaceMeasureInWarehouse,
       removeMeasureFromWarehouse,
@@ -450,4 +533,3 @@ export function useStock(): StockContextValue {
   }
   return ctx;
 }
-

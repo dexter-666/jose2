@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { STORAGE_KEY } from './services/stockSync';
 
@@ -7,6 +7,10 @@ describe('Stock por Balanza application', () => {
   beforeEach(() => {
     window.localStorage.clear();
     window.history.pushState({}, '', '/');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders both corporate logos and role cards on the landing view', () => {
@@ -131,5 +135,54 @@ describe('Stock por Balanza application', () => {
     expect(idx38).toBeGreaterThan(-1);
     expect(idx10).toBeGreaterThan(idx38);
     expect(idx12).toBeGreaterThan(idx10);
+  });
+
+  it('syncs across devices via /api/stock when cloud Redis is configured', async () => {
+    const confirmedIso = new Date(2026, 10, 10, 17, 15, 30).toISOString();
+    const remoteState = {
+      version: 1,
+      catalog: [
+        { id: '6_mm', label: '6 mm', diameterMm: 6, lengthM: 0 },
+        { id: '1_2in_x_9_m', label: '1/2" x 9 m', diameterMm: 12.7, lengthM: 9 },
+      ],
+      warehouses: {
+        PT_08: ['6_mm'],
+        PT_09: ['1_2in_x_9_m'],
+        PT_15_BAHIA: [],
+        PT_15_CURVA: [],
+      },
+      shift: '15:00',
+      lastUpdatedAt: confirmedIso,
+      lastVerifiedAt: confirmedIso,
+      revision: 4,
+    };
+
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      if (url.startsWith('/api/stock') && (!init?.method || init.method === 'GET')) {
+        return new Response(
+          JSON.stringify({
+            configured: true,
+            unchanged: false,
+            state: remoteState,
+            meta: null,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(JSON.stringify({ ok: true, configured: true }), { status: 200 });
+    });
+
+    window.history.pushState({}, '', '/balanza');
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/sincronizado en la nube/i)).toBeInTheDocument();
+      expect(screen.getByText('05:15:30 PM')).toBeInTheDocument();
+    });
+
+    const pt09Card = screen.getByRole('heading', { name: 'PT 09' }).closest('article')!;
+    expect(within(pt09Card).getByText('1/2" x 9 m')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith('/api/stock', expect.objectContaining({ method: 'GET' }));
   });
 });

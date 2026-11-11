@@ -23,12 +23,29 @@ export interface SyncEnvelope {
   meta: StockChangeMetadata;
 }
 
+export type SyncMode = 'cloud-redis' | 'local-browser';
+
+export interface RemoteFetchResult {
+  configured: boolean;
+  unchanged?: boolean;
+  revision?: number;
+  state?: StockState | null;
+  meta?: StockChangeMetadata | null;
+}
+
+export interface RemotePushResult {
+  ok: boolean;
+  configured: boolean;
+  state?: StockState;
+  meta?: StockChangeMetadata | null;
+}
+
 /**
- * Abstract interface allowing future upgrade to Supabase Realtime / Firebase / WebSockets
+ * Abstract interface allowing seamless local-browser + remote cloud sync
  * without changing UI components.
  */
 export interface StockSyncTransport {
-  readonly mode: 'local-browser';
+  readonly mode: SyncMode;
   publish: (envelope: SyncEnvelope) => void;
   subscribe: (onSync: (envelope: SyncEnvelope) => void) => () => void;
 }
@@ -129,6 +146,66 @@ export function loadPersistedStockState(): StockState {
     // Ignore storage quota errors in restricted environments
   }
   return fallback;
+}
+
+export function savePersistedStockState(state: StockState): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Ignore storage quota errors in restricted environments
+  }
+}
+
+export async function fetchRemoteStockState(
+  sinceRevision?: number
+): Promise<RemoteFetchResult | null> {
+  if (typeof fetch !== 'function') return null;
+  try {
+    const query =
+      typeof sinceRevision === 'number'
+        ? `?sinceRevision=${encodeURIComponent(String(sinceRevision))}`
+        : '';
+    const response = await fetch(`/api/stock${query}`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as RemoteFetchResult;
+    if (!data || typeof data.configured !== 'boolean') return null;
+
+    if (data.state) {
+      const clean = sanitizeStockState(data.state);
+      return { ...data, state: clean };
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function pushRemoteStockState(
+  envelope: SyncEnvelope
+): Promise<RemotePushResult | null> {
+  if (typeof fetch !== 'function') return null;
+  try {
+    const response = await fetch('/api/stock', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(envelope),
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as RemotePushResult;
+    if (data?.state) {
+      const clean = sanitizeStockState(data.state);
+      if (clean) return { ...data, state: clean };
+    }
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export function createBrowserSyncTransport(): StockSyncTransport {
