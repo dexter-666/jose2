@@ -38,6 +38,7 @@ describe('Stock por Balanza application', () => {
 
     expect(screen.getByText(/modo edición - despachador/i)).toBeInTheDocument();
     expect(screen.getByText(/hora de modificación:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/turno/i)).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 08' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 09' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - BAHIA' })).toBeInTheDocument();
@@ -73,6 +74,7 @@ describe('Stock por Balanza application', () => {
 
     expect(screen.getByText(/solo lectura/i)).toBeInTheDocument();
     expect(screen.getByText(/última modificación:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/turno/i)).not.toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /agregar medida/i })).not.toBeInTheDocument();
     expect(screen.getAllByText(/tipos de medida/i)).toHaveLength(4);

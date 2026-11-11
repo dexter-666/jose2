@@ -8,7 +8,7 @@ interface MeasureDropdownProps {
   catalog: MeasureItem[];
   selectedMeasureId: string | null;
   usedMeasureIdsInColumn: string[];
-  variant?: 'red' | 'blue';
+  variant?: 'orange-dark' | 'orange-light';
   placeholder?: string;
   autoOpen?: boolean;
   onSelect: (measureId: string) => void;
@@ -19,7 +19,7 @@ export function MeasureDropdown({
   catalog,
   selectedMeasureId,
   usedMeasureIdsInColumn,
-  variant = 'red',
+  variant = 'orange-dark',
   placeholder = 'Seleccionar medida',
   autoOpen = false,
   onSelect,
@@ -102,13 +102,13 @@ export function MeasureDropdown({
   };
 
   const headerClasses =
-    variant === 'red'
-      ? 'bg-sider-red hover:bg-sider-red-dark focus-visible:ring-sider-red'
-      : 'bg-gerdau hover:bg-gerdau-light focus-visible:ring-gerdau';
+    variant === 'orange-light'
+      ? 'bg-orange-500 hover:bg-orange-600 focus-visible:ring-orange-500'
+      : 'bg-orange-700 hover:bg-orange-800 focus-visible:ring-orange-700';
 
   return (
     <div ref={containerRef} className={`relative w-full ${isOpen ? 'z-30' : 'z-10'}`}>
-      {/* Botón estilo Siderperú: cabecera roja o azul con texto blanco y triángulo amarillo */}
+      {/* Botón desplegable en paleta naranja con texto blanco y triángulo naranja claro */}
       <button
         ref={triggerRef}
         type="button"
@@ -122,10 +122,10 @@ export function MeasureDropdown({
           {selectedMeasure ? selectedMeasure.label : placeholder}
         </span>
 
-        {/* Flecha triangular amarilla característica de Siderperú */}
+        {/* Flecha triangular naranja claro */}
         <svg
           viewBox="0 0 12 8"
-          className={`h-2.5 w-3 shrink-0 fill-sider-amber transition-transform duration-200 ${
+          className={`h-2.5 w-3 shrink-0 fill-orange-200 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : 'rotate-0'
           }`}
           aria-hidden="true"
@@ -134,21 +134,21 @@ export function MeasureDropdown({
         </svg>
       </button>
 
-      {/* Menú desplegable animado con triángulo amarillo apuntando hacia arriba */}
+      {/* Menú desplegable animado con triángulo naranja claro apuntando hacia arriba */}
       {isOpen && (
         <div className="animate-dropdown-enter absolute left-0 right-0 top-full mt-2.5 origin-top">
-          {/* Pequeño triángulo amarillo conector apuntando hacia arriba */}
+          {/* Pequeño triángulo conector apuntando hacia arriba */}
           <div
-            className="pointer-events-none absolute -top-[8px] left-6 z-10 h-0 w-0 border-x-[8px] border-b-[8px] border-x-transparent border-b-sider-amber drop-shadow-sm"
+            className="pointer-events-none absolute -top-[8px] left-6 z-10 h-0 w-0 border-x-[8px] border-b-[8px] border-x-transparent border-b-orange-400 drop-shadow-sm"
             aria-hidden="true"
           />
 
-          <div className="overflow-hidden rounded-xl border-2 border-sider-amber/80 bg-white shadow-xl ring-1 ring-black/5">
+          <div className="overflow-hidden rounded-xl border-2 border-orange-300 bg-white shadow-xl ring-1 ring-orange-950/5">
             {/* Buscador integrado dentro del dropdown */}
-            <div className="border-b border-surface-border bg-surface-panel p-2">
+            <div className="border-b border-orange-100 bg-orange-50/70 p-2">
               <div className="relative flex items-center">
                 <Search
-                  className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-slate-400"
+                  className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-orange-500"
                   aria-hidden="true"
                 />
                 <input
@@ -162,20 +162,20 @@ export function MeasureDropdown({
                   onKeyDown={handleSearchKeyDown}
                   placeholder="Buscar medida (ej: 1/2 x 9)..."
                   aria-label="Filtrar medidas en selector"
-                  className="w-full rounded-md border border-surface-border bg-white py-1.5 pl-8 pr-7 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-gerdau focus:outline-none focus:ring-1 focus:ring-gerdau"
+                  className="w-full rounded-md border border-orange-200 bg-white py-1.5 pl-8 pr-7 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
                 {query && (
                   <button
                     type="button"
                     onClick={() => setQuery('')}
                     aria-label="Limpiar filtro"
-                    className="absolute right-1.5 rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    className="absolute right-1.5 rounded p-0.5 text-slate-400 hover:bg-orange-100 hover:text-orange-800"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
-              <div className="mt-1 flex items-center justify-between px-1 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
+              <div className="mt-1 flex items-center justify-between px-1 text-[10px] font-semibold tracking-wide text-orange-800/75 uppercase">
                 <span>Orden: Delgado → Grueso</span>
                 <span>{filteredCatalog.length} opc.</span>
               </div>
@@ -186,7 +186,7 @@ export function MeasureDropdown({
               id={listboxId}
               role="listbox"
               aria-label="Medidas disponibles"
-              className="custom-scrollbar max-h-56 divide-y divide-slate-100 overflow-y-auto p-1"
+              className="custom-scrollbar max-h-56 divide-y divide-orange-50 overflow-y-auto p-1"
             >
               {filteredCatalog.length === 0 ? (
                 <li className="px-3 py-4 text-center text-xs text-slate-500">
@@ -212,28 +212,28 @@ export function MeasureDropdown({
                         onClick={() => handleSelectItem(item)}
                         className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                           isSelected
-                            ? 'bg-gerdau-soft font-bold text-gerdau'
+                            ? 'bg-orange-100 font-bold text-orange-900'
                             : isUsedElsewhere
                               ? 'cursor-not-allowed bg-slate-50/70 text-slate-400'
                               : isActive
-                                ? 'bg-sider-amber-soft text-slate-900'
-                                : 'text-slate-700 hover:bg-surface-panel'
+                                ? 'bg-orange-50 text-slate-900'
+                                : 'text-slate-700 hover:bg-orange-50/60'
                         }`}
                       >
                         <span className="flex items-center gap-2">
                           <ThicknessIndicator diameterMm={item.diameterMm} highlighted={isSelected} />
                           <span className="font-mono text-[13px] font-semibold">{item.label}</span>
                           {item.isCustom && (
-                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                            <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-800">
                               Custom
                             </span>
                           )}
                         </span>
 
                         {isSelected ? (
-                          <Check className="h-4 w-4 shrink-0 text-gerdau" aria-hidden="true" />
+                          <Check className="h-4 w-4 shrink-0 text-orange-700" aria-hidden="true" />
                         ) : isUsedElsewhere ? (
-                          <span className="rounded bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                          <span className="rounded bg-orange-100/70 px-1.5 py-0.5 text-[10px] font-medium text-orange-800/70">
                             Ya asignada
                           </span>
                         ) : null}
@@ -245,14 +245,14 @@ export function MeasureDropdown({
             </ul>
 
             {onRequestCustomMeasure && (
-              <div className="border-t border-surface-border bg-surface-panel p-1.5">
+              <div className="border-t border-orange-100 bg-orange-50/70 p-1.5">
                 <button
                   type="button"
                   onClick={() => {
                     setIsOpen(false);
                     onRequestCustomMeasure();
                   }}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-gerdau/40 bg-white px-2.5 py-1.5 text-xs font-semibold text-gerdau transition-colors hover:border-gerdau hover:bg-gerdau-soft"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-orange-400 bg-white px-2.5 py-1.5 text-xs font-semibold text-orange-700 transition-colors hover:border-orange-600 hover:bg-orange-50"
                 >
                   <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                   Agregar medida personalizada

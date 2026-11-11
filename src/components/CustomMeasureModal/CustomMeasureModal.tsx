@@ -86,10 +86,10 @@ export function CustomMeasureModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="animate-dropdown-enter w-full max-w-md overflow-hidden rounded-2xl border border-surface-border bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-surface-border bg-gerdau px-5 py-4 text-white">
+      <div className="animate-dropdown-enter w-full max-w-md overflow-hidden rounded-2xl border border-orange-200 bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-orange-200 bg-orange-600 px-5 py-4 text-white">
           <div className="flex items-center gap-2.5">
-            <Ruler className="h-5 w-5 text-sider-amber" aria-hidden="true" />
+            <Ruler className="h-5 w-5 text-orange-200" aria-hidden="true" />
             <h2 id="custom-measure-title" className="text-base font-bold">
               Nueva Medida Personalizada
             </h2>
@@ -110,9 +110,9 @@ export function CustomMeasureModal({
               Medida / Descripción del producto
             </label>
             <p className="mt-0.5 text-xs text-slate-500">
-              Ejemplos: <code className="font-mono text-gerdau">10 mm</code>,{' '}
-              <code className="font-mono text-gerdau">1 3/8&quot; x 12 m</code>,{' '}
-              <code className="font-mono text-gerdau">3/4&quot; x 6 m</code>
+              Ejemplos: <code className="font-mono text-orange-700">10 mm</code>,{' '}
+              <code className="font-mono text-orange-700">1 3/8&quot; x 12 m</code>,{' '}
+              <code className="font-mono text-orange-700">3/4&quot; x 6 m</code>
             </p>
             <input
               ref={inputRef}
@@ -124,23 +124,23 @@ export function CustomMeasureModal({
                 setError(null);
               }}
               placeholder='Ej: 1 3/8" x 12 m'
-              className="mt-2 w-full rounded-lg border border-surface-border px-3.5 py-2.5 font-mono text-sm font-semibold text-slate-900 focus:border-gerdau focus:outline-none focus:ring-2 focus:ring-gerdau/20"
+              className="mt-2 w-full rounded-lg border border-orange-200 px-3.5 py-2.5 font-mono text-sm font-semibold text-slate-900 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
 
           {label.trim() && (
-            <div className="rounded-lg border border-surface-border bg-surface-panel px-3.5 py-2.5 text-xs">
+            <div className="rounded-lg border border-orange-200 bg-orange-50/70 px-3.5 py-2.5 text-xs">
               {parsedPreview.parsed ? (
                 <div className="flex items-center justify-between text-slate-700">
                   <span>Diámetro detectado (orden automático):</span>
-                  <span className="font-mono font-bold text-gerdau">
+                  <span className="font-mono font-bold text-orange-700">
                     {parsedPreview.diameterMm.toFixed(2)} mm
                     {parsedPreview.lengthM > 0 ? ` · ${parsedPreview.lengthM} m` : ''}
                   </span>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="font-medium text-amber-800">
+                  <p className="font-medium text-orange-900">
                     Formato no estándar. Opcionalmente indica diámetro en mm para ubicarlo de delgado a grueso:
                   </p>
                   <input
@@ -151,7 +151,7 @@ export function CustomMeasureModal({
                     onChange={(e) => setManualDiameter(e.target.value)}
                     placeholder="Ej: 16 (mm)"
                     aria-label="Diámetro aproximado en milímetros"
-                    className="w-full rounded-md border border-amber-300 bg-white px-3 py-1.5 font-mono text-xs focus:border-gerdau focus:outline-none"
+                    className="w-full rounded-md border border-orange-300 bg-white px-3 py-1.5 font-mono text-xs focus:border-orange-500 focus:outline-none"
                   />
                 </div>
               )}
@@ -166,7 +166,7 @@ export function CustomMeasureModal({
               id="assign-wh-select"
               value={assignWarehouse}
               onChange={(e) => setAssignWarehouse(e.target.value as WarehouseId | '')}
-              className="mt-1.5 w-full rounded-lg border border-surface-border bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:border-gerdau focus:outline-none focus:ring-2 focus:ring-gerdau/20"
+              className="mt-1.5 w-full rounded-lg border border-orange-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             >
               <option value="">Solo agregar al catálogo general</option>
               {WAREHOUSES.map((wh) => (
@@ -178,7 +178,7 @@ export function CustomMeasureModal({
           </div>
 
           {error && (
-            <p role="alert" className="rounded-lg bg-sider-red-soft px-3 py-2 text-xs font-semibold text-sider-red">
+            <p role="alert" className="rounded-lg bg-orange-100 px-3 py-2 text-xs font-semibold text-orange-900">
               {error}
             </p>
           )}
@@ -187,13 +187,13 @@ export function CustomMeasureModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-surface-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-surface-panel"
+              className="rounded-lg border border-orange-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-orange-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-sider-red px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-sider-red-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               Guardar medida

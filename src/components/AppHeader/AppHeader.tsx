@@ -33,19 +33,19 @@ export function AppHeader() {
               >
                 <Link
                   to="/"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-gerdau/40 hover:bg-surface-panel hover:text-gerdau focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau sm:text-sm"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
                   Volver al Inicio
                 </Link>
 
-                <div className="inline-flex items-center rounded-lg border border-surface-border bg-surface-panel p-0.5">
+                <div className="inline-flex items-center rounded-lg border border-orange-200 bg-orange-50/80 p-0.5">
                   <Link
                     to="/despachador"
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau sm:text-sm ${
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 sm:text-sm ${
                       isDispatcher
-                        ? 'bg-gerdau text-white shadow-sm'
-                        : 'text-slate-600 hover:text-gerdau'
+                        ? 'bg-orange-600 text-white shadow-sm'
+                        : 'text-orange-900/75 hover:text-orange-800'
                     }`}
                     aria-current={isDispatcher ? 'page' : undefined}
                   >
@@ -54,10 +54,10 @@ export function AppHeader() {
                   </Link>
                   <Link
                     to="/balanza"
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red sm:text-sm ${
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm ${
                       isScale
-                        ? 'bg-sider-red text-white shadow-sm'
-                        : 'text-slate-600 hover:text-sider-red'
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'text-orange-900/75 hover:text-orange-700'
                     }`}
                     aria-current={isScale ? 'page' : undefined}
                   >
@@ -88,11 +88,7 @@ export function AppHeader() {
       {isHome ? (
         <div className="h-1 w-full bg-gradient-to-r from-gerdau-dark via-gerdau-light to-sky-500" />
       ) : (
-        <div className="flex h-1 w-full">
-          <div className="h-full w-1/2 bg-gerdau" />
-          <div className="h-full w-10 bg-sider-amber" />
-          <div className="h-full flex-1 bg-sider-red" />
-        </div>
+        <div className="h-1 w-full bg-gradient-to-r from-orange-700 via-orange-500 to-orange-300" />
       )}
     </header>
   );

@@ -18,13 +18,13 @@ export function ThicknessIndicator({ diameterMm, highlighted = false }: Thicknes
   const tier = getThicknessTier(diameterMm);
   return (
     <span
-      className="inline-flex h-4 w-5 shrink-0 items-center justify-center rounded bg-slate-100 px-0.5"
+      className="inline-flex h-4 w-5 shrink-0 items-center justify-center rounded bg-orange-100/80 px-0.5"
       title={`Espesor aproximado: ${diameterMm >= 9999 ? 'Personalizado' : `${diameterMm.toFixed(1)} mm`}`}
       aria-hidden="true"
     >
       <span
         className={`rounded-full transition-colors ${HEIGHT_CLASSES[tier]} ${
-          highlighted ? 'bg-sider-red' : 'bg-gerdau/80'
+          highlighted ? 'bg-orange-700' : 'bg-orange-500'
         }`}
       />
     </span>

@@ -10,9 +10,8 @@ import {
 } from 'lucide-react';
 import { CustomMeasureModal } from '../components/CustomMeasureModal/CustomMeasureModal';
 import { MeasureDropdown } from '../components/MeasureDropdown/MeasureDropdown';
-import { ShiftSelectorDropdown } from '../components/ShiftSelectorDropdown/ShiftSelectorDropdown';
 import { useStock } from '../context/StockContext';
-import { MeasureItem, ShiftCode, WarehouseId, WarehouseStockMap } from '../types/stock';
+import { MeasureItem, WarehouseId, WarehouseStockMap } from '../types/stock';
 import {
   buildMeasureItem,
   sortCatalogMeasures,
@@ -27,7 +26,6 @@ export function DispatcherView() {
   // Borrador editable en Despachador: los cambios se guardan y envían a Balanza al confirmar
   const [draftCatalog, setDraftCatalog] = useState<MeasureItem[]>(() => state.catalog);
   const [draftWarehouses, setDraftWarehouses] = useState<WarehouseStockMap>(() => state.warehouses);
-  const [draftShift, setDraftShift] = useState<ShiftCode>(() => state.shift);
   const lastStateRevisionRef = useRef(state.revision);
 
   // Reloj en tiempo real para "Hora de modificación"
@@ -47,7 +45,6 @@ export function DispatcherView() {
   }, []);
 
   const hasUnsavedChanges = useMemo(() => {
-    if (draftShift !== state.shift) return true;
     if (draftCatalog.length !== state.catalog.length) return true;
     if (draftCatalog.some((m, i) => state.catalog[i]?.id !== m.id)) return true;
     return WAREHOUSES.some((wh) => {
@@ -55,16 +52,15 @@ export function DispatcherView() {
       const b = state.warehouses[wh.id];
       return a.length !== b.length || a.some((id, idx) => b[idx] !== id);
     });
-  }, [draftCatalog, draftShift, draftWarehouses, state.catalog, state.shift, state.warehouses]);
+  }, [draftCatalog, draftWarehouses, state.catalog, state.warehouses]);
 
   useEffect(() => {
     if (state.revision !== lastStateRevisionRef.current) {
       lastStateRevisionRef.current = state.revision;
       setDraftCatalog(state.catalog);
       setDraftWarehouses(state.warehouses);
-      setDraftShift(state.shift);
     }
-  }, [state.catalog, state.revision, state.shift, state.warehouses]);
+  }, [state.catalog, state.revision, state.warehouses]);
 
   useEffect(() => {
     if (!feedbackMessage) return;
@@ -166,7 +162,7 @@ export function DispatcherView() {
     const confirmedIso = confirmStockChanges({
       catalog: draftCatalog,
       warehouses: draftWarehouses,
-      shift: draftShift,
+      shift: state.shift,
     });
     setPendingSlotWarehouse(null);
     setFeedbackMessage(
@@ -180,28 +176,28 @@ export function DispatcherView() {
   };
 
   return (
-    <main className="flex-1 bg-surface-panel">
+    <main className="flex-1 bg-gradient-to-b from-[#FFF9F2] to-[#FFF1E0]">
       <div className="animate-page-enter mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
         {/* Barra de Estado y Controles del Despachador */}
         <section
           aria-label="Controles del despachador"
-          className="rounded-2xl border border-surface-border bg-white p-4 shadow-sm sm:p-5"
+          className="rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-gerdau/25 bg-gerdau-soft px-3.5 py-1 text-xs font-extrabold tracking-wide text-gerdau uppercase">
-                  <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-100 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-900 uppercase">
+                  <Edit3 className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
                   Modo Edición - Despachador
                 </span>
                 {hasUnsavedChanges ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sider-amber-soft px-3 py-1 text-xs font-bold text-amber-900">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-sider-amber" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-800">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-orange-500" />
                     Cambios sin confirmar
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-800">
+                    <span className="h-2 w-2 rounded-full bg-orange-500" />
                     Sincronizado con Balanza
                   </span>
                 )}
@@ -213,10 +209,10 @@ export function DispatcherView() {
 
               {/* Reloj en tiempo real */}
               <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
-                <Clock className="h-4 w-4 text-gerdau" aria-hidden="true" />
+                <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
                 <span>
                   Hora de modificación:{' '}
-                  <strong className="font-mono text-sm font-extrabold text-gerdau sm:text-base">
+                  <strong className="font-mono text-sm font-extrabold text-orange-700 sm:text-base">
                     {formatTime12h(liveNow)}
                   </strong>
                 </span>
@@ -224,14 +220,12 @@ export function DispatcherView() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              <ShiftSelectorDropdown shift={draftShift} onChange={setDraftShift} />
-
               <button
                 type="button"
                 onClick={() => openCustomModal()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-gerdau/30 bg-white px-3.5 py-2 text-xs font-bold text-gerdau shadow-sm transition-colors hover:bg-gerdau-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau sm:text-sm"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-orange-300 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-800 shadow-sm transition-colors hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
               >
-                <Ruler className="h-4 w-4" aria-hidden="true" />
+                <Ruler className="h-4 w-4 text-orange-600" aria-hidden="true" />
                 Nueva medida
               </button>
 
@@ -243,7 +237,7 @@ export function DispatcherView() {
                     setConfirmReset(false);
                     setFeedbackMessage('Stock restablecido al catálogo inicial.');
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-sider-red bg-sider-red-soft px-3 py-2 text-xs font-bold text-sider-red transition-colors hover:bg-sider-red hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500 bg-orange-100 px-3 py-2 text-xs font-bold text-orange-900 transition-colors hover:bg-orange-600 hover:text-white"
                 >
                   ¿Confirmar reinicio?
                 </button>
@@ -253,7 +247,7 @@ export function DispatcherView() {
                   onClick={() => setConfirmReset(true)}
                   title="Restablecer ejemplo inicial"
                   aria-label="Restablecer ejemplo inicial"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface-panel px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200/70 hover:text-slate-900"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50/60 px-3 py-2 text-xs font-semibold text-orange-900/80 transition-colors hover:bg-orange-100 hover:text-orange-900"
                 >
                   <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                   <span className="hidden sm:inline">Restablecer</span>
@@ -265,9 +259,9 @@ export function DispatcherView() {
           {feedbackMessage && (
             <div
               role="status"
-              className="animate-dropdown-enter mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-800 sm:text-sm"
+              className="animate-dropdown-enter mt-4 flex items-center gap-2 rounded-xl border border-orange-300 bg-orange-50 px-4 py-2.5 text-xs font-semibold text-orange-900 sm:text-sm"
             >
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-600" aria-hidden="true" />
               {feedbackMessage}
             </div>
           )}
@@ -282,36 +276,36 @@ export function DispatcherView() {
             const assignedIds = draftWarehouses[wh.id];
             const isPendingHere = pendingSlotWarehouse === wh.id;
             const remainingCatalogCount = draftCatalog.length - assignedIds.length;
-            const isBlue = wh.accent === 'blue';
+            const isDarkOrange = wh.accent === 'blue';
 
             return (
               <article
                 key={wh.id}
-                className="flex flex-col rounded-2xl border border-surface-border bg-white shadow-sm"
+                className="flex flex-col rounded-2xl border border-orange-200 bg-white shadow-sm"
               >
-                {/* Cabecera fija no modificable */}
+                {/* Cabecera fija no modificable en naranja / naranja claro */}
                 <header
                   className={`flex items-center justify-between rounded-t-2xl px-4 py-3.5 text-white ${
-                    isBlue ? 'bg-gerdau' : 'bg-sider-red'
+                    isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
                   }`}
                 >
                   <div>
                     <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
-                    <p className="text-[11px] font-medium text-white/80">{wh.zone}</p>
+                    <p className="text-[11px] font-medium text-orange-50/90">{wh.zone}</p>
                   </div>
-                  <span className="rounded-full bg-white/15 px-2.5 py-1 font-mono text-xs font-bold text-sider-amber">
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
                     {assignedIds.length}
                   </span>
                 </header>
 
                 {/* Barra de subinfo */}
-                <div className="flex items-center justify-between border-b border-surface-border bg-surface-panel/80 px-4 py-2 text-[11px] font-semibold text-slate-600">
+                <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2 text-[11px] font-semibold text-orange-900/80">
                   <span>Tipos de medida (delgado → grueso)</span>
                   {assignedIds.length > 0 && (
                     <button
                       type="button"
                       onClick={() => handleClearWarehouse(wh.id)}
-                      className="text-slate-500 underline-offset-2 transition-colors hover:text-sider-red hover:underline"
+                      className="text-orange-800/75 underline-offset-2 transition-colors hover:text-orange-700 hover:underline"
                     >
                       Limpiar
                     </button>
@@ -321,8 +315,8 @@ export function DispatcherView() {
                 {/* Ranuras editables */}
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   {assignedIds.length === 0 && !isPendingHere ? (
-                    <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-surface-panel/50 px-4 py-8 text-center">
-                      <p className="text-sm font-semibold text-slate-600">
+                    <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 px-4 py-8 text-center">
+                      <p className="text-sm font-semibold text-slate-700">
                         Sin medidas asignadas
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
@@ -334,14 +328,14 @@ export function DispatcherView() {
                       {assignedIds.map((measureId) => (
                         <div
                           key={measureId}
-                          className="flex items-center gap-2 rounded-xl border border-surface-border bg-surface-panel/60 p-2"
+                          className="flex items-center gap-2 rounded-xl border border-orange-200/80 bg-orange-50/40 p-2"
                         >
                           <div className="min-w-0 flex-1">
                             <MeasureDropdown
                               catalog={draftCatalog}
                               selectedMeasureId={measureId}
                               usedMeasureIdsInColumn={assignedIds}
-                              variant={isBlue ? 'blue' : 'red'}
+                              variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
                               onSelect={(newId) =>
                                 handleReplaceMeasure(wh.id, measureId, newId)
                               }
@@ -354,7 +348,7 @@ export function DispatcherView() {
                             onClick={() => handleRemoveMeasure(wh.id, measureId)}
                             title="Eliminar / Producto agotado"
                             aria-label={`Quitar medida de ${wh.label}`}
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-surface-border bg-white text-slate-500 transition-colors hover:border-sider-red/40 hover:bg-sider-red-soft hover:text-sider-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 transition-colors hover:border-orange-400 hover:bg-orange-100 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -362,13 +356,13 @@ export function DispatcherView() {
                       ))}
 
                       {isPendingHere && (
-                        <div className="flex items-center gap-2 rounded-xl border-2 border-dashed border-sider-amber bg-sider-amber-soft/50 p-2">
+                        <div className="flex items-center gap-2 rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-2">
                           <div className="min-w-0 flex-1">
                             <MeasureDropdown
                               catalog={draftCatalog}
                               selectedMeasureId={null}
                               usedMeasureIdsInColumn={assignedIds}
-                              variant={isBlue ? 'blue' : 'red'}
+                              variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
                               placeholder="Elegir medida..."
                               autoOpen
                               onSelect={(newId) => {
@@ -386,7 +380,7 @@ export function DispatcherView() {
                             onClick={() => setPendingSlotWarehouse(null)}
                             title="Cancelar casilla"
                             aria-label="Cancelar nueva casilla"
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-surface-border bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 hover:bg-orange-100 hover:text-orange-900"
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -404,9 +398,9 @@ export function DispatcherView() {
                       className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed px-3 py-2.5 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:text-sm ${
                         remainingCatalogCount <= 0
                           ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
-                          : isBlue
-                            ? 'border-gerdau/35 bg-gerdau-soft/40 text-gerdau hover:border-gerdau hover:bg-gerdau-soft focus-visible:ring-gerdau'
-                            : 'border-sider-red/35 bg-sider-red-soft/40 text-sider-red hover:border-sider-red hover:bg-sider-red-soft focus-visible:ring-sider-red'
+                          : isDarkOrange
+                            ? 'border-orange-300 bg-orange-50/70 text-orange-800 hover:border-orange-600 hover:bg-orange-100 focus-visible:ring-orange-600'
+                            : 'border-orange-300 bg-orange-50/50 text-orange-700 hover:border-orange-500 hover:bg-orange-100 focus-visible:ring-orange-500'
                       }`}
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />
@@ -422,16 +416,16 @@ export function DispatcherView() {
         </section>
 
         {/* Botón de Confirmación / Verificación en la parte inferior derecha */}
-        <div className="mt-6 flex flex-col items-end justify-between gap-3 rounded-2xl border border-surface-border bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col items-end justify-between gap-3 rounded-2xl border border-orange-200 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center">
           <div className="text-xs font-medium text-slate-600 sm:text-sm">
             {hasUnsavedChanges ? (
-              <span className="font-semibold text-amber-800">
+              <span className="font-semibold text-orange-800">
                 Tienes cambios pendientes por confirmar hacia Balanza.
               </span>
             ) : state.lastVerifiedAt ? (
               <span>
                 Última confirmación enviada a Balanza:{' '}
-                <strong className="font-mono text-slate-900">
+                <strong className="font-mono text-orange-800">
                   {formatTime12h(state.lastVerifiedAt)}
                 </strong>
               </span>
@@ -443,9 +437,9 @@ export function DispatcherView() {
           <button
             type="button"
             onClick={handleConfirmChanges}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-extrabold text-white shadow-md transition-all hover:bg-emerald-700 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-3 text-sm font-extrabold text-white shadow-md shadow-orange-600/20 transition-all hover:bg-orange-700 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2"
           >
-            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            <CheckCircle2 className="h-5 w-5 text-orange-100" aria-hidden="true" />
             Confirmado / Verificado
           </button>
         </div>
