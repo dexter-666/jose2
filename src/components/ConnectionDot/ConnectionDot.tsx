@@ -13,11 +13,11 @@ export function ConnectionDot({ connected }: ConnectionDotProps) {
       {connected ? (
         <>
           <span
-            className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-emerald-400 opacity-60"
+            className="absolute inline-flex h-3.5 w-3.5 animate-ping rounded-full bg-orange-400 opacity-65"
             aria-hidden="true"
           />
           <span
-            className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 transition-all duration-300"
+            className="relative inline-flex h-3 w-3 rounded-full bg-orange-500 ring-4 ring-orange-500/25 transition-all duration-300"
             aria-hidden="true"
           />
         </>
@@ -30,3 +30,4 @@ export function ConnectionDot({ connected }: ConnectionDotProps) {
     </span>
   );
 }
+
