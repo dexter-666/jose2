@@ -92,6 +92,7 @@ describe('Stock por Balanza application', () => {
     expect(screen.queryByText(/disponibilidad de stock por almacén/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/almacén producto terminado/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/delgado → grueso/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/en stock/i)).not.toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /agregar medida/i })).not.toBeInTheDocument();
     expect(screen.getAllByText(/tipos de medida/i)).toHaveLength(4);

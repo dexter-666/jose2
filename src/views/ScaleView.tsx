@@ -325,13 +325,9 @@ export function ScaleView() {
                                 </span>
                               </div>
 
-                              {isMatch ? (
+                              {isMatch && (
                                 <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase">
                                   Disponible
-                                </span>
-                              ) : (
-                                <span className="rounded-md bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-800">
-                                  En stock
                                 </span>
                               )}
                             </li>
