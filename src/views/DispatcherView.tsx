@@ -322,9 +322,6 @@ export function DispatcherView() {
                       <p className="text-sm font-semibold text-slate-700">
                         Sin medidas asignadas
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Usa &ldquo;+ Agregar medida&rdquo; para habilitar productos en {wh.label}.
-                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
