@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Filter, Lock, Monitor, Radio, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Filter, Lock, Radio, Search, X } from 'lucide-react';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
@@ -79,11 +79,8 @@ export function ScaleView() {
                 </span>
               </div>
 
-              <h1 className="mt-2.5 flex items-center gap-2.5 text-xl font-extrabold text-slate-900 sm:text-2xl">
-                <Monitor className="h-6 w-6 shrink-0 text-orange-600" aria-hidden="true" />
-                Disponibilidad de Stock por Almacén
-              </h1>
-              <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
+              <h1 className="sr-only">Monitor de Balanza</h1>
+              <p className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
                 <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
                 <span>
                   Última modificación:{' '}
@@ -94,10 +91,10 @@ export function ScaleView() {
               </p>
             </div>
 
-            {/* Buscador Rápido de Picking SAP */}
+            {/* Buscador Rápido */}
             <div className="w-full lg:max-w-lg">
               <label htmlFor="balanza-search" className="sr-only">
-                Buscar medida del picking SAP
+                Buscar medida
               </label>
               <div className="relative flex items-center">
                 <Search
@@ -109,7 +106,7 @@ export function ScaleView() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder='Buscar medida SAP (ej: "1/2 x 9", "3/8 x 12", "8 mm")...'
+                  placeholder="Buscar medida..."
                   className="w-full rounded-xl border-2 border-orange-200 bg-orange-50/40 py-3 pl-11 pr-10 font-mono text-sm font-semibold text-slate-900 placeholder:font-sans placeholder:font-medium placeholder:text-slate-400 focus:border-orange-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/25"
                 />
                 {hasQuery && (

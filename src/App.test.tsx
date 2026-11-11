@@ -79,12 +79,13 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByText(/solo lectura/i)).toBeInTheDocument();
     expect(screen.getByText(/última modificación:/i)).toBeInTheDocument();
     expect(screen.queryByText(/turno/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/disponibilidad de stock por almacén/i)).not.toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /agregar medida/i })).not.toBeInTheDocument();
     expect(screen.getAllByText(/tipos de medida/i)).toHaveLength(4);
 
     // Search "1/2 x 9" highlights matching columns
-    const searchInput = screen.getByPlaceholderText(/buscar medida sap/i);
+    const searchInput = screen.getByPlaceholderText(/^buscar medida\.\.\.$/i);
     fireEvent.change(searchInput, { target: { value: '1/2 x 9' } });
     expect(screen.getByText(/disponible en:/i)).toBeInTheDocument();
     expect(screen.getAllByText('Disponible').length).toBeGreaterThanOrEqual(1);
