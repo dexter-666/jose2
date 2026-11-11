@@ -295,7 +295,6 @@ export function DispatcherView() {
                 >
                   <div>
                     <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
-                    <p className="text-[11px] font-medium text-orange-50/90">{wh.zone}</p>
                   </div>
                   <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
                     {assignedIds.length}
@@ -304,7 +303,7 @@ export function DispatcherView() {
 
                 {/* Barra de subinfo */}
                 <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2 text-[11px] font-semibold text-orange-900/80">
-                  <span>Tipos de medida (delgado → grueso)</span>
+                  <span>Tipos de medida</span>
                   {assignedIds.length > 0 && (
                     <button
                       type="button"

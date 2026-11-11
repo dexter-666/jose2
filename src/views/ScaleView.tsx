@@ -269,7 +269,6 @@ export function ScaleView() {
                   >
                     <div>
                       <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
-                      <p className="text-[11px] font-medium text-orange-50/90">{wh.zone}</p>
                     </div>
                     {isHighlightedColumn ? (
                       <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-extrabold text-orange-950">
@@ -287,9 +286,6 @@ export function ScaleView() {
                     <h3 className="text-xs font-bold tracking-wide text-orange-950 uppercase">
                       Tipos de medida
                     </h3>
-                    <span className="text-[11px] font-medium text-orange-800/75">
-                      Delgado → Grueso
-                    </span>
                   </div>
 
                   {/* Tarjetas estáticas de solo lectura */}
