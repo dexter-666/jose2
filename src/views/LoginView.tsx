@@ -15,7 +15,7 @@ export function LoginView() {
     roleParam === 'despachador'
       ? 'Despachador'
       : roleParam === 'balanza'
-        ? 'Balanzero'
+        ? 'Balancero'
         : '';
 
   const [username, setUsername] = useState(initialUsername);
@@ -33,7 +33,7 @@ export function LoginView() {
       setUsername('Despachador');
       passwordInputRef.current?.focus();
     } else if (roleParam === 'balanza') {
-      setUsername('Balanzero');
+      setUsername('Balancero');
       passwordInputRef.current?.focus();
     } else {
       usernameInputRef.current?.focus();
@@ -142,7 +142,7 @@ export function LoginView() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Despachador o Balanzero"
+                    placeholder="Despachador o Balancero"
                     className="w-full rounded-xl border-2 border-orange-200 bg-orange-50/30 py-2.5 pl-10 pr-3.5 text-sm font-semibold text-slate-900 transition-colors placeholder:text-slate-400 focus:border-orange-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/20"
                   />
                 </div>

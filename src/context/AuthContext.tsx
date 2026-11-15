@@ -99,12 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true, role: 'despachador' };
     }
 
-    // 2) Balanzero: Usuario "Balanzero", Contraseña "Balanza2026"
-    if (lowerUser === 'balanzero' && password === 'Balanza2026') {
+    // 2) Balancero: Usuario "Balancero", Contraseña "Balanza2026"
+    if ((lowerUser === 'balancero' || lowerUser === 'balanzero') && password === 'Balanza2026') {
       const loggedUser: AuthUser = {
-        username: 'Balanzero',
+        username: 'Balancero',
         role: 'balanza',
-        displayName: 'Balanzero (Balanza)',
+        displayName: 'Balancero (Balanza)',
       };
       setUser(loggedUser);
       persistUser(loggedUser);

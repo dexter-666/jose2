@@ -6,9 +6,9 @@ const AUTH_KEY = 'gerdau_siderperu_auth_session_v1';
 
 function loginAs(role: 'despachador' | 'balanza') {
   const session = {
-    username: role === 'despachador' ? 'Despachador' : 'Balanzero',
+    username: role === 'despachador' ? 'Despachador' : 'Balancero',
     role,
-    displayName: role === 'despachador' ? 'Despachador (Almacén)' : 'Balanzero (Balanza)',
+    displayName: role === 'despachador' ? 'Despachador (Almacén)' : 'Balancero (Balanza)',
   };
   window.sessionStorage.setItem(AUTH_KEY, JSON.stringify(session));
   window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
@@ -71,7 +71,7 @@ describe('Stock por Balanza application', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Balanzero');
+    expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Balancero');
 
     fireEvent.change(screen.getByLabelText(/^contraseña$/i), { target: { value: 'Balanza2026' } });
     fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }));
