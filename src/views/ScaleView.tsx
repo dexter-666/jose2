@@ -67,15 +67,15 @@ export function ScaleView() {
   return (
     <main className="flex-1 bg-gradient-to-b from-[#FFF9F2] to-[#FFF1E0]">
       <div className="animate-page-enter mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        {/* Cabecera de Monitor Balanza (100% Solo Lectura) */}
+        {/* Cabecera de Monitor Balanza (100% Solo Lectura · Liquid Glass) */}
         <section
           aria-label="Monitor de balanza en tiempo real"
-          className="rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:p-5"
+          className="liquid-glass-card mb-6 p-4 shadow-md sm:p-6"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-100 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-900 uppercase">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/90 bg-orange-100/80 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-950 uppercase shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-sm">
                   <Lock className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
                   Solo Lectura · Monitor Balanza
                 </span>
@@ -94,7 +94,7 @@ export function ScaleView() {
               </p>
             </div>
 
-            {/* Buscador Rápido */}
+            {/* Buscador Rápido con Liquid Glass */}
             <div className="w-full lg:max-w-lg">
               <label htmlFor="balanza-search" className="sr-only">
                 Buscar medida
@@ -110,7 +110,7 @@ export function ScaleView() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar medida..."
-                  className="w-full rounded-xl border-2 border-orange-200 bg-orange-50/40 py-3 pl-11 pr-10 font-mono text-sm font-semibold text-slate-900 placeholder:font-sans placeholder:font-medium placeholder:text-slate-400 focus:border-orange-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/25"
+                  className="w-full rounded-xl border border-white/90 bg-white/75 py-2.5 pl-11 pr-10 font-mono text-sm font-semibold text-slate-900 placeholder:font-sans placeholder:font-medium placeholder:text-slate-400 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] backdrop-blur-md focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/25 transition-all"
                 />
                 {hasQuery && (
                   <button
@@ -134,10 +134,10 @@ export function ScaleView() {
                       key={chip}
                       type="button"
                       onClick={() => setSearchQuery(active ? '' : chip)}
-                      className={`rounded-md px-2 py-1 font-mono text-[11px] font-bold transition-all ${
+                      className={`liquid-glass-pill rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold transition-all ${
                         active
-                          ? 'bg-orange-600 text-white shadow-sm'
-                          : 'border border-orange-200 bg-orange-50/70 text-orange-900 hover:border-orange-400 hover:bg-orange-100'
+                          ? 'liquid-glass-active text-white'
+                          : 'text-slate-700 hover:text-orange-900'
                       }`}
                     >
                       {chip}
@@ -149,7 +149,7 @@ export function ScaleView() {
           </div>
 
           {/* Filtro por los 8 Grupos de Clasificación en Balanza */}
-          <div className="mt-4 border-t border-orange-100 pt-3">
+          <div className="mt-4 border-t border-white/60 pt-3">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="mr-2 flex items-center gap-1 text-[11px] font-bold tracking-wide text-slate-600 uppercase">
                 <Layers className="h-3 w-3 text-orange-600" />
@@ -158,10 +158,10 @@ export function ScaleView() {
               <button
                 type="button"
                 onClick={() => setSelectedGroup('ALL')}
-                className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
+                className={`liquid-glass-pill rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
                   selectedGroup === 'ALL'
-                    ? 'bg-orange-600 text-white shadow-sm'
-                    : 'border border-orange-200 bg-orange-50/60 text-slate-700 hover:bg-orange-100'
+                    ? 'liquid-glass-active text-white'
+                    : 'text-slate-700 hover:text-orange-900'
                 }`}
               >
                 Todos

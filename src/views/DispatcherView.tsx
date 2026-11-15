@@ -187,21 +187,21 @@ export function DispatcherView() {
   return (
     <main className="flex-1 bg-gradient-to-b from-[#FFF9F2] to-[#FFF1E0]">
       <div className="animate-page-enter mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        {/* Barra de Estado y Controles del Despachador */}
+        {/* Barra de Estado y Controles del Despachador (Liquid Glass) */}
         <section
           aria-label="Controles del despachador"
-          className="rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:p-5"
+          className="liquid-glass-card mb-6 p-4 shadow-md sm:p-6"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-100 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-900 uppercase">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/90 bg-orange-100/80 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-950 uppercase shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-sm">
                   <Edit3 className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
                   Modo Edición - Despachador
                 </span>
                 <ConnectionDot connected={isConnected} />
                 {hasUnsavedChanges && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-800">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50/90 px-3 py-1 text-xs font-bold text-orange-900 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)]">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-orange-500" />
                     Cambios sin confirmar
                   </span>
@@ -228,7 +228,7 @@ export function DispatcherView() {
               <button
                 type="button"
                 onClick={() => openCustomModal()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-orange-300 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-800 shadow-sm transition-colors hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
+                className="liquid-glass-pill inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold text-orange-950 shadow-sm transition-all hover:text-orange-700 hover:border-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
               >
                 <Ruler className="h-4 w-4 text-orange-600" aria-hidden="true" />
                 Nueva medida
@@ -242,7 +242,7 @@ export function DispatcherView() {
                     setConfirmReset(false);
                     setFeedbackMessage('Medidas restablecidas al catálogo inicial.');
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500 bg-orange-100 px-3 py-2 text-xs font-bold text-orange-900 transition-colors hover:bg-orange-600 hover:text-white"
+                  className="liquid-glass-pill inline-flex items-center gap-1.5 rounded-xl border-orange-500 bg-orange-100/90 px-3.5 py-2.5 text-xs font-extrabold text-orange-900 transition-colors hover:bg-orange-600 hover:text-white"
                 >
                   ¿Confirmar reinicio?
                 </button>
@@ -252,7 +252,7 @@ export function DispatcherView() {
                   onClick={() => setConfirmReset(true)}
                   title="Restablecer ejemplo inicial"
                   aria-label="Restablecer ejemplo inicial"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50/60 px-3 py-2 text-xs font-semibold text-orange-900/80 transition-colors hover:bg-orange-100 hover:text-orange-900"
+                  className="liquid-glass-pill inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-orange-50 hover:text-orange-900"
                 >
                   <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                   <span className="hidden sm:inline">Restablecer</span>
