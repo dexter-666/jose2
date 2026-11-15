@@ -13,12 +13,13 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const location = useLocation();
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const roleParam = requiredRole ? `?role=${requiredRole}` : '';
+    return <Navigate to={`/login${roleParam}`} state={{ from: location }} replace />;
   }
 
-  // If a specific role is required and current role doesn't match, redirect to own role's view
+  // If a specific role is required and current role doesn't match, require login for that role
   if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to={user.role === 'despachador' ? '/despachador' : '/balanza'} replace />;
+    return <Navigate to={`/login?role=${requiredRole}`} state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

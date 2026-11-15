@@ -18,49 +18,58 @@ describe('Stock por Balanza application', () => {
   beforeEach(() => {
     window.localStorage.clear();
     window.sessionStorage.clear();
-    window.history.pushState({}, '', '/login');
+    window.history.pushState({}, '', '/');
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('renders corporate logos and login form with required credentials', () => {
+  it('renders both corporate logos and role cards on the main landing view', () => {
     render(<App />);
 
     expect(screen.getByAltText('Logo Gerdau')).toHaveAttribute('src', '/images/gerdaulogo.png');
     expect(screen.getByAltText('Logo Siderperú')).toHaveAttribute('src', '/images/siderlogo.png');
-    expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/^usuario$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^contraseña$/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument();
-
-    // Perfiles autorizados visibles
-    expect(screen.getByText(/despachador/i)).toBeInTheDocument();
-    expect(screen.getByText('Almacen2026')).toBeInTheDocument();
-    expect(screen.getByText(/balanzero/i)).toBeInTheDocument();
-    expect(screen.getByText('Balanza2026')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /stock de almacenes/i })).toBeInTheDocument();
+    expect(screen.getByText(/actualizar medidas disponibles por almacén/i)).toBeInTheDocument();
+    expect(screen.getByText(/visualizar medidas disponibles por almacén/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /abrir editable almacén/i })).toHaveAttribute(
+      'href',
+      '/despachador'
+    );
+    expect(screen.getByRole('link', { name: /abrir monitor balanza/i })).toHaveAttribute(
+      'href',
+      '/balanza'
+    );
   });
 
-  it('authenticates Despachador with Almacen2026 and allows logout', () => {
+  it('prompts for login when unauthenticated user enters Despachador', () => {
+    window.history.pushState({}, '', '/despachador');
     render(<App />);
 
-    fireEvent.change(screen.getByLabelText(/^usuario$/i), { target: { value: 'Despachador' } });
+    // Redirige al login con foco en despachador
+    expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Despachador');
+
+    // Ingresar credencial correcta Almacen2026
     fireEvent.change(screen.getByLabelText(/^contraseña$/i), { target: { value: 'Almacen2026' } });
     fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }));
 
+    // Accede a Despachador
     expect(screen.getByText(/modo edición - despachador/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /cerrar sesión/i })).toBeInTheDocument();
 
-    // Cerrar sesión regresa a login
-    fireEvent.click(screen.getByRole('button', { name: /cerrar sesión/i }));
-    expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
+    // Volver al Inicio disponible en la cabecera
+    expect(screen.getByRole('link', { name: /volver al inicio/i })).toHaveAttribute('href', '/');
   });
 
-  it('authenticates Balanzero with Balanza2026 and loads Balanza view', () => {
+  it('prompts for login when unauthenticated user enters Balanza', () => {
+    window.history.pushState({}, '', '/balanza');
     render(<App />);
 
-    fireEvent.change(screen.getByLabelText(/^usuario$/i), { target: { value: 'Balanzero' } });
+    expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Balanzero');
+
     fireEvent.change(screen.getByLabelText(/^contraseña$/i), { target: { value: 'Balanza2026' } });
     fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }));
 
@@ -68,6 +77,7 @@ describe('Stock por Balanza application', () => {
   });
 
   it('rejects invalid credentials with an error message', () => {
+    window.history.pushState({}, '', '/login');
     render(<App />);
 
     fireEvent.change(screen.getByLabelText(/^usuario$/i), { target: { value: 'Despachador' } });

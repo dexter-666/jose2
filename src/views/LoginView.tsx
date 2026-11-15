@@ -1,20 +1,47 @@
-import { useState, type FormEvent } from 'react';
-import { Eye, EyeOff, Lock, LogIn, ShieldAlert, User, Warehouse, Monitor } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { ArrowLeft, Eye, EyeOff, Lock, LogIn, Monitor, ShieldAlert, User, Warehouse } from 'lucide-react';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginView() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  const [username, setUsername] = useState('');
+  const roleParam = searchParams.get('role'); // 'despachador' | 'balanza' | null
+
+  const initialUsername =
+    roleParam === 'despachador'
+      ? 'Despachador'
+      : roleParam === 'balanza'
+        ? 'Balanzero'
+        : '';
+
+  const [username, setUsername] = useState(initialUsername);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Si ya tiene sesión activa, redirige según su rol
-  if (user) {
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const usernameInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus password input if username is prefilled, otherwise focus username
+  useEffect(() => {
+    if (roleParam === 'despachador') {
+      setUsername('Despachador');
+      passwordInputRef.current?.focus();
+    } else if (roleParam === 'balanza') {
+      setUsername('Balanzero');
+      passwordInputRef.current?.focus();
+    } else {
+      usernameInputRef.current?.focus();
+    }
+  }, [roleParam]);
+
+  // Si ya tiene sesión activa y no está intentando cambiar a otro rol específico, redirigir
+  if (user && (!roleParam || user.role === roleParam)) {
     return <Navigate to={user.role === 'despachador' ? '/despachador' : '/balanza'} replace />;
   }
 
@@ -27,10 +54,11 @@ export function LoginView() {
     setIsLoading(false);
 
     if (result.success) {
+      const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname;
       if (result.role === 'despachador') {
-        navigate('/despachador', { replace: true });
+        navigate(fromPath && fromPath.includes('despachador') ? fromPath : '/despachador', { replace: true });
       } else {
-        navigate('/balanza', { replace: true });
+        navigate(fromPath && fromPath.includes('balanza') ? fromPath : '/balanza', { replace: true });
       }
     } else {
       setErrorMessage(result.error ?? 'Credenciales inválidas');
@@ -41,13 +69,25 @@ export function LoginView() {
     setUsername(u);
     setPassword(p);
     setErrorMessage(null);
+    passwordInputRef.current?.focus();
   };
 
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#FFF9F2] via-[#FFF1E0] to-[#FFE8CC] px-4 py-12 sm:px-6 lg:px-8">
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#FFF9F2] via-[#FFF1E0] to-[#FFE8CC] px-4 py-10 sm:px-6 lg:px-8">
       <div className="bg-industrial-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
 
       <div className="animate-page-enter relative w-full max-w-md">
+        {/* Botón Volver al Inicio */}
+        <div className="mb-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-50 hover:text-orange-900"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 text-orange-600" aria-hidden="true" />
+            Volver a Selección de Roles
+          </Link>
+        </div>
+
         {/* Tarjeta de Inicio de Sesión */}
         <div className="overflow-hidden rounded-3xl border border-orange-200 bg-white/95 p-7 shadow-xl shadow-orange-950/5 backdrop-blur-sm sm:p-9">
           {/* Cabecera de la tarjeta */}
@@ -59,7 +99,11 @@ export function LoginView() {
               Control de Stock
             </h1>
             <p className="mt-1 text-xs font-semibold text-orange-900/80 sm:text-sm">
-              Inicia sesión para acceder a tu perfil asignado
+              {roleParam === 'despachador'
+                ? 'Ingresa credenciales para Despachador (Almacén)'
+                : roleParam === 'balanza'
+                  ? 'Ingresa credenciales para Monitor Balanza'
+                  : 'Inicia sesión para acceder a tu perfil asignado'}
             </p>
           </div>
 
@@ -90,11 +134,11 @@ export function LoginView() {
                   aria-hidden="true"
                 />
                 <input
+                  ref={usernameInputRef}
                   id="username"
                   name="username"
                   type="text"
                   autoComplete="username"
-                  autoFocus
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -118,6 +162,7 @@ export function LoginView() {
                   aria-hidden="true"
                 />
                 <input
+                  ref={passwordInputRef}
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
@@ -159,7 +204,11 @@ export function LoginView() {
               <button
                 type="button"
                 onClick={() => handleQuickFill('Despachador', 'Almacen2026')}
-                className="flex flex-col items-start rounded-xl border border-orange-200 bg-orange-50/50 p-2.5 text-left transition-colors hover:border-orange-400 hover:bg-orange-100/70"
+                className={`flex flex-col items-start rounded-xl border p-2.5 text-left transition-colors ${
+                  roleParam === 'despachador'
+                    ? 'border-orange-500 bg-orange-100/80 shadow-xs ring-2 ring-orange-500/25'
+                    : 'border-orange-200 bg-orange-50/50 hover:border-orange-400 hover:bg-orange-100/70'
+                }`}
               >
                 <div className="flex items-center gap-1.5 text-xs font-bold text-orange-900">
                   <Warehouse className="h-3.5 w-3.5 text-orange-600" />
@@ -171,7 +220,11 @@ export function LoginView() {
               <button
                 type="button"
                 onClick={() => handleQuickFill('Balanzero', 'Balanza2026')}
-                className="flex flex-col items-start rounded-xl border border-orange-200 bg-orange-50/50 p-2.5 text-left transition-colors hover:border-orange-400 hover:bg-orange-100/70"
+                className={`flex flex-col items-start rounded-xl border p-2.5 text-left transition-colors ${
+                  roleParam === 'balanza'
+                    ? 'border-orange-500 bg-orange-100/80 shadow-xs ring-2 ring-orange-500/25'
+                    : 'border-orange-200 bg-orange-50/50 hover:border-orange-400 hover:bg-orange-100/70'
+                }`}
               >
                 <div className="flex items-center gap-1.5 text-xs font-bold text-orange-900">
                   <Monitor className="h-3.5 w-3.5 text-orange-600" />
