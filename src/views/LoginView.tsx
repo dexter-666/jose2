@@ -96,7 +96,7 @@ export function LoginView() {
                 <Lock className="h-7 w-7" aria-hidden="true" />
               </div>
               <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-                Control de Stock
+                Control de Medidas
               </h1>
               <p className="mt-1 text-xs font-semibold text-orange-900/80 sm:text-sm">
                 {roleParam === 'despachador'

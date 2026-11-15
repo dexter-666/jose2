@@ -240,7 +240,7 @@ export function DispatcherView() {
                   onClick={() => {
                     resetDemoStock();
                     setConfirmReset(false);
-                    setFeedbackMessage('Stock restablecido al catálogo inicial.');
+                    setFeedbackMessage('Medidas restablecidas al catálogo inicial.');
                   }}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500 bg-orange-100 px-3 py-2 text-xs font-bold text-orange-900 transition-colors hover:bg-orange-600 hover:text-white"
                 >

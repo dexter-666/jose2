@@ -196,7 +196,7 @@ export function ScaleView() {
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-600" aria-hidden="true" />
                 <span>
                   {recentPulse.action === 'verify'
-                    ? 'Stock confirmado por Despacho'
+                    ? 'Medidas confirmadas por Despacho'
                     : 'Actualización recibida desde Despacho en tiempo real'}
                   {(recentPulse.affectedWarehouses?.length ?? 0) > 0 &&
                     (recentPulse.affectedWarehouses?.length ?? 0) < 4 && (
@@ -238,7 +238,7 @@ export function ScaleView() {
                   </span>
                 ) : (
                   <span className="font-semibold text-orange-800">
-                    No se encontraron almacenes con stock para &ldquo;{searchQuery}&rdquo;.
+                    No se encontraron almacenes con medidas para &ldquo;{searchQuery}&rdquo;.
                   </span>
                 )}
               </div>
