@@ -406,9 +406,6 @@ export function DispatcherView() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-black tracking-wider uppercase">
-                      {wh.label.replace(/\s+/g, '')}
-                    </span>
                     <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
                   </div>
                   <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
@@ -452,19 +449,16 @@ export function DispatcherView() {
                             className="flex flex-col gap-1.5 rounded-xl border border-orange-200/90 bg-orange-50/40 p-2.5 shadow-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              {/* Código de producto + Grupo */}
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <span className="rounded bg-orange-200/80 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900">
-                                  {wh.label.replace(/\s+/g, '')}
-                                </span>
-                                {measure && (
-                                  <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold text-orange-800">
-                                    {measure.group}
+                              {/* 1. Código primero, 2. Clasificación luego (Agrandados) */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                {measure?.sapCode && (
+                                  <span className="rounded-md bg-white px-2.5 py-1 font-mono text-xs sm:text-sm font-black text-slate-800 shadow-2xs border border-orange-200">
+                                    CÓDIGO: {measure.sapCode}
                                   </span>
                                 )}
-                                {measure?.sapCode && (
-                                  <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 shadow-2xs border border-orange-200/60">
-                                    CÓDIGO: {measure.sapCode}
+                                {measure && (
+                                  <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs sm:text-sm font-extrabold uppercase text-orange-900 border border-orange-200/70">
+                                    {measure.group}
                                   </span>
                                 )}
                               </div>
@@ -475,9 +469,9 @@ export function DispatcherView() {
                                 onClick={() => handleRemoveMeasure(wh.id, measureId)}
                                 title="Eliminar / Producto agotado"
                                 aria-label={`Quitar medida de ${wh.label}`}
-                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 transition-colors hover:border-orange-400 hover:bg-orange-100 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 transition-colors hover:border-orange-400 hover:bg-orange-100 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                               >
-                                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                               </button>
                             </div>
 

@@ -134,18 +134,12 @@ export function MeasureDropdown({
         aria-controls={isOpen ? listboxId : undefined}
         className={`flex w-full items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-left text-sm font-bold text-white shadow-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${headerClasses}`}
       >
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate font-mono text-xs font-black tracking-tight sm:text-sm">
+        <div className="flex min-w-0 flex-1 items-center">
+          <span className="truncate font-mono text-sm sm:text-base font-black tracking-tight">
             {selectedMeasure
               ? selectedMeasure.metricDisplay || selectedMeasure.label
               : placeholder}
           </span>
-          {selectedMeasure && (
-            <span className="truncate text-[10px] font-medium text-orange-200">
-              {selectedMeasure.sapCode ? `[${selectedMeasure.sapCode}] ` : ''}
-              {selectedMeasure.technicalDescription}
-            </span>
-          )}
         </div>
 
         {/* Flecha triangular naranja claro */}

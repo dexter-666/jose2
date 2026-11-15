@@ -309,9 +309,6 @@ export function ScaleView() {
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-black tracking-wider uppercase">
-                        {wh.label.replace(/\s+/g, '')}
-                      </span>
                       <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
                     </div>
                     {isHighlightedColumn ? (
@@ -365,21 +362,17 @@ export function ScaleView() {
                             >
                               {/* Fila Superior: Código de Producto + Clasificación + Código SAP */}
                               <div className="flex items-center justify-between gap-2">
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  {/* CÓDIGO OBLIGATORIO DEL PRODUCTO */}
-                                  <span className="rounded bg-orange-200/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-950 uppercase">
-                                    {wh.label.replace(/\s+/g, '')}
-                                  </span>
-                                  {/* CLASIFICACIÓN (VISTA FINAL BALANZA) */}
-                                  <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-extrabold text-orange-800 shadow-2xs border border-orange-200/70 uppercase">
-                                    {measure.group}
-                                  </span>
-                                  {/* CÓDIGO (VISTA FINAL BALANZA) */}
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {/* CÓDIGO PRIMERO */}
                                   {measure.sapCode && (
-                                    <span className="rounded bg-orange-100/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900 border border-orange-200/80">
+                                    <span className="rounded-md bg-white px-2 py-0.5 font-mono text-xs sm:text-[13px] font-black text-slate-800 shadow-2xs border border-orange-200">
                                       CÓDIGO: {measure.sapCode}
                                     </span>
                                   )}
+                                  {/* CLASIFICACIÓN LUEGO */}
+                                  <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs sm:text-[13px] font-extrabold uppercase text-orange-900 border border-orange-200/80">
+                                    {measure.group}
+                                  </span>
                                 </div>
 
                                 {isMatch && (
