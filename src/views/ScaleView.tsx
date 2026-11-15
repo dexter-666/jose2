@@ -1,18 +1,15 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Filter, Layers, Lock, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Filter, Lock, Search, X } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
-import { ClassificationGroup, MeasureItem } from '../types/stock';
-import { CLASSIFICATION_GROUPS, matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
+import { MeasureItem } from '../types/stock';
+import { matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
 import { formatTime12h } from '../utils/shifts';
-
-const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4', '1"'] as const;
 
 export function ScaleView() {
   const { state, catalogMap, isConnected, recentPulse, dismissPulse } = useStock();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState<ClassificationGroup | 'ALL'>('ALL');
   const [hideNonMatchingColumns, setHideNonMatchingColumns] = useState(false);
 
   const hasQuery = searchQuery.trim().length > 0;
@@ -31,24 +28,18 @@ export function ScaleView() {
         .map((id) => catalogMap.get(id))
         .filter((item): item is MeasureItem => Boolean(item));
 
-      // Filtro por grupo de clasificación si no es 'ALL'
-      const groupScopedMeasures =
-        selectedGroup === 'ALL'
-          ? rawMeasures
-          : rawMeasures.filter((m) => m.group === selectedGroup);
-
       const matchingIds = new Set(
         hasQuery
-          ? groupScopedMeasures
+          ? rawMeasures
               .filter((m) => matchesMeasureQuery(m, searchQuery))
               .map((m) => m.id)
           : []
       );
 
-      map.set(wh.id, { allMeasures: groupScopedMeasures, matchingIds });
+      map.set(wh.id, { allMeasures: rawMeasures, matchingIds });
     }
     return map;
-  }, [state.warehouses, catalogMap, selectedGroup, hasQuery, searchQuery]);
+  }, [state.warehouses, catalogMap, hasQuery, searchQuery]);
 
   const matchingWarehouseLabels = useMemo(() => {
     if (!hasQuery) return [];
@@ -95,7 +86,7 @@ export function ScaleView() {
             </div>
 
             {/* Buscador Rápido con Liquid Glass */}
-            <div className="w-full lg:max-w-lg">
+            <div className="w-full lg:max-w-md">
               <label htmlFor="balanza-search" className="sr-only">
                 Buscar medida
               </label>
@@ -123,66 +114,6 @@ export function ScaleView() {
                   </button>
                 )}
               </div>
-
-              {/* Chips de acceso rápido por diámetro */}
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-[11px] font-semibold text-slate-500">Filtro rápido:</span>
-                {QUICK_FILTER_CHIPS.map((chip) => {
-                  const active = searchQuery.trim().toLowerCase() === chip.toLowerCase();
-                  return (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => setSearchQuery(active ? '' : chip)}
-                      className={`liquid-glass-pill rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold transition-all ${
-                        active
-                          ? 'liquid-glass-active text-white'
-                          : 'text-slate-700 hover:text-orange-900'
-                      }`}
-                    >
-                      {chip}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Filtro por los 8 Grupos de Clasificación en Balanza */}
-          <div className="mt-4 border-t border-white/60 pt-3">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-2 flex items-center gap-1 text-[11px] font-bold tracking-wide text-slate-600 uppercase">
-                <Layers className="h-3 w-3 text-orange-600" />
-                Grupos:
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedGroup('ALL')}
-                className={`liquid-glass-pill rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                  selectedGroup === 'ALL'
-                    ? 'liquid-glass-active text-white'
-                    : 'text-slate-700 hover:text-orange-900'
-                }`}
-              >
-                Todos
-              </button>
-              {CLASSIFICATION_GROUPS.map((g) => {
-                const isActive = selectedGroup === g;
-                return (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setSelectedGroup(isActive ? 'ALL' : g)}
-                    className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
-                      isActive
-                        ? 'bg-orange-600 text-white shadow-sm'
-                        : 'border border-orange-200 bg-orange-50/60 text-slate-700 hover:bg-orange-100'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                );
-              })}
             </div>
           </div>
 
@@ -333,9 +264,7 @@ export function ScaleView() {
                   <div className="flex-1 p-4">
                     {info.allMeasures.length === 0 ? (
                       <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
-                        {selectedGroup !== 'ALL'
-                          ? `Sin medidas en ${selectedGroup}`
-                          : 'Sin medidas registradas en este almacén'}
+                        Sin medidas asignadas
                       </div>
                     ) : (
                       <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>

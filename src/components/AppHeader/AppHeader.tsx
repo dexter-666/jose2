@@ -1,11 +1,11 @@
-import { ArrowLeft, Edit3, LogOut, Monitor, User } from 'lucide-react';
+import { ArrowLeft, Edit3, LogOut, Monitor } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export function AppHeader() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const isHome = pathname === '/';
   const isDispatcher = pathname === '/despachador';
@@ -54,18 +54,6 @@ export function AppHeader() {
 
                 {isAuthenticated && (
                   <>
-                    {/* Divisor sutil de vidrio */}
-                    <div
-                      className="hidden h-5 w-px bg-slate-300/60 shadow-[1px_0_0_rgba(255,255,255,0.8)] sm:block"
-                      aria-hidden="true"
-                    />
-
-                    {/* Badge de usuario autenticado */}
-                    <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-orange-200/90 bg-orange-100/70 px-3 py-1.5 text-xs font-bold text-orange-950 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] sm:inline-flex">
-                      <User className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
-                      <span>{user?.displayName ?? user?.username}</span>
-                    </span>
-
                     {/* Divisor sutil de vidrio */}
                     <div
                       className="h-5 w-px bg-slate-300/60 shadow-[1px_0_0_rgba(255,255,255,0.8)]"
