@@ -50,6 +50,9 @@ describe('Stock por Balanza application', () => {
     // Redirige al login con foco en despachador
     expect(screen.getByRole('heading', { name: /control de stock/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Despachador');
+    expect(screen.getByRole('link', { name: /volver a selección de roles/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /volver al inicio/i })).toHaveAttribute('href', '/');
+    expect(screen.queryByText(/perfiles y accesos autorizados/i)).not.toBeInTheDocument();
 
     // Ingresar credencial correcta Almacen2026
     fireEvent.change(screen.getByLabelText(/^contraseña$/i), { target: { value: 'Almacen2026' } });

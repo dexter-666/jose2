@@ -19,23 +19,25 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-[88px] flex-wrap items-center justify-between gap-3 py-3">
+        <div className="grid min-h-[88px] grid-cols-2 items-center gap-3 py-3 sm:grid-cols-[1fr_auto_1fr]">
           {/* Esquina Superior Izquierda: Logo GERDAU -> Siempre lleva a la pantalla principal */}
-          <Link
-            to="/"
-            aria-label="Gerdau - Ir al inicio"
-            className="flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau"
-          >
-            <img
-              src="/images/gerdaulogo.png"
-              alt="Logo Gerdau"
-              className="h-14 w-auto object-contain sm:h-16"
-            />
-          </Link>
+          <div className="flex items-center justify-start">
+            <Link
+              to="/"
+              aria-label="Gerdau - Ir al inicio"
+              className="flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau"
+            >
+              <img
+                src="/images/gerdaulogo.png"
+                alt="Logo Gerdau"
+                className="h-14 w-auto object-contain sm:h-16"
+              />
+            </Link>
+          </div>
 
-          {/* Centro: Volver al Inicio, Perfil Activo, Navegación y Cerrar Sesión */}
-          {!isHome && (
-            <div className="order-3 flex w-full items-center justify-center gap-2.5 border-t border-surface-border pt-2 sm:order-2 sm:w-auto sm:border-t-0 sm:pt-0">
+          {/* Centro: Volver al Inicio, Perfil Activo, Navegación y Cerrar Sesión (Rigurosamente Centrado) */}
+          {!isHome ? (
+            <div className="order-3 col-span-2 flex items-center justify-center border-t border-surface-border pt-2 sm:order-2 sm:col-span-1 sm:border-t-0 sm:pt-0">
               <nav
                 aria-label="Navegación principal"
                 className="flex flex-wrap items-center justify-center gap-2"
@@ -99,20 +101,24 @@ export function AppHeader() {
                 )}
               </nav>
             </div>
+          ) : (
+            <div className="hidden sm:block" />
           )}
 
           {/* Esquina Superior Derecha: Logo SIDERPERU -> Siempre lleva a la pantalla principal */}
-          <Link
-            to="/"
-            aria-label="Siderperú - Ir al inicio"
-            className="order-2 flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red sm:order-3"
-          >
-            <img
-              src="/images/siderlogo.png"
-              alt="Logo Siderperú"
-              className="h-10 w-auto object-contain sm:h-12"
-            />
-          </Link>
+          <div className="flex items-center justify-end">
+            <Link
+              to="/"
+              aria-label="Siderperú - Ir al inicio"
+              className="flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red"
+            >
+              <img
+                src="/images/siderlogo.png"
+                alt="Logo Siderperú"
+                className="h-10 w-auto object-contain sm:h-12"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
