@@ -136,9 +136,9 @@ describe('Stock por Balanza application', () => {
     expect(screen.queryByText(/delgado → grueso/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/en stock/i)).not.toBeInTheDocument();
 
-    // Cada registro obligatorio muestra el código de producto (PT08, etc.) y código SAP
+    // Cada registro obligatorio muestra el código de producto (PT08, etc.) y código
     expect(screen.getAllByText('PT08').length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/sap 110000257/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/código:? 110000257/i).length).toBeGreaterThan(0);
 
     // Buscador
     const searchInput = screen.getByPlaceholderText(/^buscar medida\.\.\.$/i);

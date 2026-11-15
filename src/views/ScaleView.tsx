@@ -374,10 +374,10 @@ export function ScaleView() {
                                   <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-extrabold text-orange-800 shadow-2xs border border-orange-200/70 uppercase">
                                     {measure.group}
                                   </span>
-                                  {/* CÓDIGO SAP (VISTA FINAL BALANZA) */}
+                                  {/* CÓDIGO (VISTA FINAL BALANZA) */}
                                   {measure.sapCode && (
                                     <span className="rounded bg-orange-100/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900 border border-orange-200/80">
-                                      SAP {measure.sapCode}
+                                      CÓDIGO: {measure.sapCode}
                                     </span>
                                   )}
                                 </div>

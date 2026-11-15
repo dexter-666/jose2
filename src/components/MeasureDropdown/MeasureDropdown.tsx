@@ -299,7 +299,7 @@ export function MeasureDropdown({
                               </span>
                               {item.sapCode && (
                                 <span className="font-mono text-slate-600">
-                                  SAP: {item.sapCode}
+                                  CÓDIGO: {item.sapCode}
                                 </span>
                               )}
                               {item.isCustom && (

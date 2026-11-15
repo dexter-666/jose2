@@ -1,10 +1,24 @@
 import { Redis } from '@upstash/redis';
-import {
-  createInitialStockState,
-  sanitizeStockState,
-  STORAGE_KEY,
-} from '../src/services/stockSync';
-import type { StockChangeMetadata, StockState } from '../src/types/stock';
+
+export const STORAGE_KEY = 'gerdau_siderperu_stock_v1';
+
+export interface StockChangeMetadata {
+  sourceTabId: string;
+  action: 'verify' | 'reset' | 'catalog_add' | 'update';
+  affectedWarehouses: string[];
+  affectedMeasureIds: string[];
+  timestamp: string;
+}
+
+export interface StockState {
+  version: number;
+  catalog: unknown[];
+  warehouses: Record<string, string[]>;
+  shift: string;
+  lastUpdatedAt: string;
+  lastVerifiedAt: string | null;
+  revision: number;
+}
 
 interface StoredStockRecord {
   state: StockState;
@@ -48,13 +62,30 @@ function sanitizeMeta(raw: unknown, fallbackTimestamp: string): StockChangeMetad
         ? candidate.action
         : 'update',
     affectedWarehouses: Array.isArray(candidate.affectedWarehouses)
-      ? candidate.affectedWarehouses
+      ? candidate.affectedWarehouses.filter((x): x is string => typeof x === 'string')
       : [],
     affectedMeasureIds: Array.isArray(candidate.affectedMeasureIds)
-      ? candidate.affectedMeasureIds
+      ? candidate.affectedMeasureIds.filter((x): x is string => typeof x === 'string')
       : [],
     timestamp:
       typeof candidate.timestamp === 'string' ? candidate.timestamp : fallbackTimestamp,
+  };
+}
+
+function sanitizeStockState(raw: unknown): StockState | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const candidate = raw as Partial<StockState>;
+  if (!Array.isArray(candidate.catalog) || !candidate.warehouses || typeof candidate.warehouses !== 'object') {
+    return null;
+  }
+  return {
+    version: typeof candidate.version === 'number' ? candidate.version : 1,
+    catalog: candidate.catalog,
+    warehouses: candidate.warehouses as Record<string, string[]>,
+    shift: typeof candidate.shift === 'string' ? candidate.shift : 'Turno 1',
+    lastUpdatedAt: typeof candidate.lastUpdatedAt === 'string' ? candidate.lastUpdatedAt : new Date().toISOString(),
+    lastVerifiedAt: typeof candidate.lastVerifiedAt === 'string' ? candidate.lastVerifiedAt : null,
+    revision: typeof candidate.revision === 'number' ? candidate.revision : 1,
   };
 }
 
@@ -69,21 +100,16 @@ export async function GET(request: Request): Promise<Response> {
     const sinceParam = url.searchParams.get('sinceRevision');
     const sinceRevision = sinceParam !== null ? Number.parseInt(sinceParam, 10) : NaN;
 
-    let record = await redis.get<StoredStockRecord>(STORAGE_KEY);
-    let cleanState = record ? sanitizeStockState(record.state) : null;
+    const record = await redis.get<StoredStockRecord>(STORAGE_KEY);
+    const cleanState = record ? sanitizeStockState(record.state) : null;
 
     if (!cleanState) {
-      cleanState = createInitialStockState();
-      const initialRecord: StoredStockRecord = { state: cleanState, meta: null };
-      await redis.set(STORAGE_KEY, initialRecord, { nx: true });
-      const storedAfterNx = await redis.get<StoredStockRecord>(STORAGE_KEY);
-      if (storedAfterNx) {
-        const sanitizedAfter = sanitizeStockState(storedAfterNx.state);
-        if (sanitizedAfter) {
-          cleanState = sanitizedAfter;
-          record = storedAfterNx;
-        }
-      }
+      return jsonResponse({
+        configured: true,
+        unchanged: false,
+        state: null,
+        meta: null,
+      });
     }
 
     if (!Number.isNaN(sinceRevision) && cleanState.revision <= sinceRevision) {
@@ -146,4 +172,3 @@ export async function POST(request: Request): Promise<Response> {
     return jsonResponse({ ok: false, configured: true, error: message }, 500);
   }
 }
-

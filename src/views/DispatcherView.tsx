@@ -464,7 +464,7 @@ export function DispatcherView() {
                                 )}
                                 {measure?.sapCode && (
                                   <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 shadow-2xs border border-orange-200/60">
-                                    SAP: {measure.sapCode}
+                                    CÓDIGO: {measure.sapCode}
                                   </span>
                                 )}
                               </div>
