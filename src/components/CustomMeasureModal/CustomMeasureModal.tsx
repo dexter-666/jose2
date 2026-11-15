@@ -1,25 +1,35 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Ruler, X } from 'lucide-react';
-import { MeasureItem, WarehouseId } from '../../types/stock';
-import { parseMeasureMetrics, WAREHOUSES } from '../../utils/measures';
+import { ClassificationGroup, MeasureItem, WarehouseId } from '../../types/stock';
+import { CLASSIFICATION_GROUPS, inferTechnicalDescription, parseMeasureMetrics, WAREHOUSES } from '../../utils/measures';
 
 interface CustomMeasureModalProps {
   isOpen: boolean;
   defaultWarehouseId?: WarehouseId | null;
+  defaultGroup?: ClassificationGroup | null;
   onClose: () => void;
   onCreate: (
     label: string,
-    options?: { overrideDiameterMm?: number; overrideLengthM?: number; autoAssignTo?: WarehouseId }
+    options?: {
+      overrideDiameterMm?: number;
+      overrideLengthM?: number;
+      autoAssignTo?: WarehouseId;
+      group?: ClassificationGroup;
+      technicalDescription?: string;
+    }
   ) => { ok: boolean; error?: string; measure?: MeasureItem };
 }
 
 export function CustomMeasureModal({
   isOpen,
   defaultWarehouseId = null,
+  defaultGroup = null,
   onClose,
   onCreate,
 }: CustomMeasureModalProps) {
   const [label, setLabel] = useState('');
+  const [technicalDescription, setTechnicalDescription] = useState('');
+  const [group, setGroup] = useState<ClassificationGroup>(defaultGroup ?? 'Nacional');
   const [manualDiameter, setManualDiameter] = useState('');
   const [assignWarehouse, setAssignWarehouse] = useState<WarehouseId | ''>(
     defaultWarehouseId ?? ''
@@ -30,13 +40,15 @@ export function CustomMeasureModal({
   useEffect(() => {
     if (isOpen) {
       setLabel('');
+      setTechnicalDescription('');
+      setGroup(defaultGroup ?? 'Nacional');
       setManualDiameter('');
       setAssignWarehouse(defaultWarehouseId ?? '');
       setError(null);
       const t = window.setTimeout(() => inputRef.current?.focus(), 30);
       return () => window.clearTimeout(t);
     }
-  }, [isOpen, defaultWarehouseId]);
+  }, [isOpen, defaultWarehouseId, defaultGroup]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -63,9 +75,13 @@ export function CustomMeasureModal({
       return;
     }
 
+    const finalTechDesc = technicalDescription.trim() || inferTechnicalDescription(label, group);
+
     const res = onCreate(label, {
       overrideDiameterMm: overrideMm,
       autoAssignTo: assignWarehouse || undefined,
+      group,
+      technicalDescription: finalTechDesc,
     });
 
     if (!res.ok) {
@@ -91,7 +107,7 @@ export function CustomMeasureModal({
           <div className="flex items-center gap-2.5">
             <Ruler className="h-5 w-5 text-orange-200" aria-hidden="true" />
             <h2 id="custom-measure-title" className="text-base font-bold">
-              Nueva Medida Personalizada
+              Nueva Medida / Descripción Técnica
             </h2>
           </div>
           <button
@@ -105,43 +121,82 @@ export function CustomMeasureModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 p-5">
+          {/* Grupo de Clasificación (8 Grupos) */}
           <div>
-            <label htmlFor="measure-label-input" className="block text-sm font-semibold text-slate-800">
-              Medida / Descripción del producto
+            <label htmlFor="measure-group-select" className="block text-xs font-bold text-slate-800 uppercase">
+              Grupo de Clasificación
+            </label>
+            <select
+              id="measure-group-select"
+              value={group}
+              onChange={(e) => setGroup(e.target.value as ClassificationGroup)}
+              className="mt-1.5 w-full rounded-lg border border-orange-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            >
+              {CLASSIFICATION_GROUPS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Medida / Dimensión */}
+          <div>
+            <label htmlFor="measure-label-input" className="block text-xs font-bold text-slate-800 uppercase">
+              Medida / Dimensión
             </label>
             <p className="mt-0.5 text-xs text-slate-500">
-              Ejemplos: <code className="font-mono text-orange-700">10 mm</code>,{' '}
-              <code className="font-mono text-orange-700">1 3/8&quot; x 12 m</code>,{' '}
-              <code className="font-mono text-orange-700">3/4&quot; x 6 m</code>
+              Ejemplos: <code className="font-mono text-orange-700">1/2&quot; x 9 m</code>,{' '}
+              <code className="font-mono text-orange-700">10 mm</code>,{' '}
+              <code className="font-mono text-orange-700">1 3/8&quot; x 12 m</code>
             </p>
             <input
               ref={inputRef}
               id="measure-label-input"
               type="text"
+              required
               value={label}
               onChange={(e) => {
                 setLabel(e.target.value);
                 setError(null);
               }}
-              placeholder='Ej: 1 3/8" x 12 m'
-              className="mt-2 w-full rounded-lg border border-orange-200 px-3.5 py-2.5 font-mono text-sm font-semibold text-slate-900 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              placeholder='Ej: 1/2" x 9 m'
+              className="mt-1.5 w-full rounded-lg border border-orange-200 px-3.5 py-2 font-mono text-sm font-semibold text-slate-900 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </div>
+
+          {/* Descripción Técnica Completa */}
+          <div>
+            <label htmlFor="measure-tech-input" className="block text-xs font-bold text-slate-800 uppercase">
+              Descripción Técnica Completa
+            </label>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Ejemplo: <code className="font-mono text-orange-700">Media x 9 y A 6 15</code>
+            </p>
+            <input
+              id="measure-tech-input"
+              type="text"
+              value={technicalDescription}
+              onChange={(e) => setTechnicalDescription(e.target.value)}
+              placeholder={label.trim() ? inferTechnicalDescription(label, group) : 'Ej: Media x 9 y A 6 15'}
+              className="mt-1.5 w-full rounded-lg border border-orange-200 px-3.5 py-2 font-mono text-sm font-semibold text-slate-900 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
 
           {label.trim() && (
-            <div className="rounded-lg border border-orange-200 bg-orange-50/70 px-3.5 py-2.5 text-xs">
+            <div className="rounded-lg border border-orange-200 bg-orange-50/70 px-3.5 py-2 text-xs">
               {parsedPreview.parsed ? (
                 <div className="flex items-center justify-between text-slate-700">
-                  <span>Diámetro detectado (orden automático):</span>
+                  <span>Métrica calculada:</span>
                   <span className="font-mono font-bold text-orange-700">
-                    {parsedPreview.diameterMm.toFixed(2)} mm
+                    Ø {parsedPreview.diameterMm.toFixed(2)} mm
                     {parsedPreview.lengthM > 0 ? ` · ${parsedPreview.lengthM} m` : ''}
                   </span>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <p className="font-medium text-orange-900">
-                    Formato no estándar. Opcionalmente indica diámetro en mm para ubicarlo de delgado a grueso:
+                    Opcionalmente indica diámetro en mm para ordenación delgado-grueso:
                   </p>
                   <input
                     type="number"
@@ -151,7 +206,7 @@ export function CustomMeasureModal({
                     onChange={(e) => setManualDiameter(e.target.value)}
                     placeholder="Ej: 16 (mm)"
                     aria-label="Diámetro aproximado en milímetros"
-                    className="w-full rounded-md border border-orange-300 bg-white px-3 py-1.5 font-mono text-xs focus:border-orange-500 focus:outline-none"
+                    className="w-full rounded-md border border-orange-300 bg-white px-3 py-1 font-mono text-xs focus:border-orange-500 focus:outline-none"
                   />
                 </div>
               )}
@@ -159,8 +214,8 @@ export function CustomMeasureModal({
           )}
 
           <div>
-            <label htmlFor="assign-wh-select" className="block text-sm font-semibold text-slate-800">
-              Asignar inmediatamente a almacén (opcional)
+            <label htmlFor="assign-wh-select" className="block text-xs font-bold text-slate-800 uppercase">
+              Asignar a columna (opcional)
             </label>
             <select
               id="assign-wh-select"

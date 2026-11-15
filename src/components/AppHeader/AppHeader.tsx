@@ -1,11 +1,20 @@
-import { ArrowLeft, Edit3, Monitor } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Edit3, LogOut, Monitor, User } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export function AppHeader() {
   const { pathname } = useLocation();
-  const isHome = pathname === '/';
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const isHome = pathname === '/' || pathname === '/login';
   const isDispatcher = pathname === '/despachador';
   const isScale = pathname === '/balanza';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm">
@@ -13,7 +22,7 @@ export function AppHeader() {
         <div className="flex min-h-[88px] flex-wrap items-center justify-between gap-3 py-3">
           {/* Esquina Superior Izquierda: Logo GERDAU */}
           <Link
-            to="/"
+            to={isAuthenticated ? (user?.role === 'despachador' ? '/despachador' : '/balanza') : '/login'}
             aria-label="Gerdau - Ir al inicio"
             className="flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau"
           >
@@ -24,21 +33,20 @@ export function AppHeader() {
             />
           </Link>
 
-          {/* Centro: Navegación contextual y botón Volver al Inicio */}
-          {!isHome && (
-            <div className="order-3 flex w-full items-center justify-center gap-2 border-t border-surface-border pt-2 sm:order-2 sm:w-auto sm:border-t-0 sm:pt-0">
+          {/* Centro: Perfil Activo, Navegación y Cerrar Sesión */}
+          {isAuthenticated && (
+            <div className="order-3 flex w-full items-center justify-center gap-2.5 border-t border-surface-border pt-2 sm:order-2 sm:w-auto sm:border-t-0 sm:pt-0">
               <nav
                 aria-label="Navegación principal"
                 className="flex flex-wrap items-center justify-center gap-2"
               >
-                <Link
-                  to="/"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-orange-400 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                  Volver al Inicio
-                </Link>
+                {/* Badge de usuario autenticado */}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-100/90 px-3 py-1 text-xs font-bold text-orange-950">
+                  <User className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
+                  <span>{user?.displayName ?? user?.username}</span>
+                </span>
 
+                {/* Alternador de Vistas */}
                 <div className="inline-flex items-center rounded-lg border border-orange-200 bg-orange-50/80 p-0.5">
                   <Link
                     to="/despachador"
@@ -65,13 +73,24 @@ export function AppHeader() {
                     Balanza
                   </Link>
                 </div>
+
+                {/* Botón Cerrar Sesión */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="Cerrar sesión para alternar perfil"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-300 bg-white px-3 py-1.5 text-xs font-bold text-orange-800 shadow-sm transition-all hover:border-orange-500 hover:bg-orange-100 hover:text-orange-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 sm:text-sm"
+                >
+                  <LogOut className="h-3.5 w-3.5 text-orange-600" aria-hidden="true" />
+                  <span>Cerrar sesión</span>
+                </button>
               </nav>
             </div>
           )}
 
           {/* Esquina Superior Derecha: Logo SIDERPERU */}
           <Link
-            to="/"
+            to={isAuthenticated ? (user?.role === 'despachador' ? '/despachador' : '/balanza') : '/login'}
             aria-label="Siderperú - Ir al inicio"
             className="order-2 flex shrink-0 items-center rounded-lg p-1 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sider-red sm:order-3"
           >
@@ -93,4 +112,3 @@ export function AppHeader() {
     </header>
   );
 }
-

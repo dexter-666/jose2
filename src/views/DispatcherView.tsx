@@ -3,6 +3,8 @@ import {
   CheckCircle2,
   Clock,
   Edit3,
+  Filter,
+  Layers,
   Plus,
   RotateCcw,
   Ruler,
@@ -12,9 +14,10 @@ import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { CustomMeasureModal } from '../components/CustomMeasureModal/CustomMeasureModal';
 import { MeasureDropdown } from '../components/MeasureDropdown/MeasureDropdown';
 import { useStock } from '../context/StockContext';
-import { MeasureItem, WarehouseId, WarehouseStockMap } from '../types/stock';
+import { ClassificationGroup, MeasureItem, WarehouseId, WarehouseStockMap } from '../types/stock';
 import {
   buildMeasureItem,
+  CLASSIFICATION_GROUPS,
   sortCatalogMeasures,
   sortMeasureIdsByCatalog,
   WAREHOUSES,
@@ -31,6 +34,9 @@ export function DispatcherView() {
 
   // Reloj en tiempo real para "Hora de modificación"
   const [liveNow, setLiveNow] = useState<Date>(() => new Date());
+
+  // 8 Grupos de Clasificación requeridos por especificación
+  const [selectedGroup, setSelectedGroup] = useState<ClassificationGroup | 'ALL'>('ALL');
 
   const [pendingSlotWarehouse, setPendingSlotWarehouse] = useState<WarehouseId | null>(null);
   const [customModalWarehouse, setCustomModalWarehouse] = useState<WarehouseId | null>(null);
@@ -80,6 +86,15 @@ export function DispatcherView() {
     [draftCatalog]
   );
 
+  // Conteo de medidas por cada uno de los 8 grupos en el catálogo
+  const groupCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const g of CLASSIFICATION_GROUPS) {
+      counts[g] = draftCatalog.filter((m) => m.group === g).length;
+    }
+    return counts;
+  }, [draftCatalog]);
+
   const handleAddMeasure = (warehouseId: WarehouseId, measureId: string) => {
     setDraftWarehouses((prev) => ({
       ...prev,
@@ -118,26 +133,34 @@ export function DispatcherView() {
 
   const handleCreateCustomMeasure = (
     label: string,
-    options?: { overrideDiameterMm?: number; overrideLengthM?: number; autoAssignTo?: WarehouseId }
+    options?: {
+      overrideDiameterMm?: number;
+      overrideLengthM?: number;
+      autoAssignTo?: WarehouseId;
+      group?: ClassificationGroup;
+      technicalDescription?: string;
+    }
   ): { ok: boolean; error?: string; measure?: MeasureItem } => {
     const trimmed = label.trim().replace(/\s+/g, ' ');
     if (!trimmed) {
-      return { ok: false, error: 'Ingresa el nombre de la medida (ej: 1 3/8" x 12 m o 16 mm).' };
+      return { ok: false, error: 'Ingresa el nombre o dimensión de la medida.' };
     }
 
     const newMeasure = buildMeasureItem(trimmed, {
       isCustom: true,
+      group: options?.group ?? (selectedGroup !== 'ALL' ? selectedGroup : 'Nacional'),
+      technicalDescription: options?.technicalDescription,
       overrideDiameterMm: options?.overrideDiameterMm,
       overrideLengthM: options?.overrideLengthM,
     });
 
     const duplicate = draftCatalog.find(
-      (m) => m.id === newMeasure.id || m.label.toLowerCase() === newMeasure.label.toLowerCase()
+      (m) => m.id === newMeasure.id || m.technicalDescription.toLowerCase() === newMeasure.technicalDescription.toLowerCase()
     );
     if (duplicate) {
       return {
         ok: false,
-        error: `La medida "${duplicate.label}" ya existe en el catálogo.`,
+        error: `La medida "${duplicate.technicalDescription || duplicate.label}" ya existe en el catálogo.`,
       };
     }
 
@@ -154,7 +177,7 @@ export function DispatcherView() {
     }
 
     setFeedbackMessage(
-      `Medida "${newMeasure.label}" agregada. Presiona Confirmado / Verificado para enviar a Balanza.`
+      `Medida "${newMeasure.technicalDescription}" agregada al grupo ${newMeasure.group}. Presiona Confirmado / Verificado para enviar a Balanza.`
     );
     return { ok: true, measure: newMeasure };
   };
@@ -264,15 +287,111 @@ export function DispatcherView() {
           )}
         </section>
 
-        {/* Tablero de 4 Columnas Fijas (Cabeceras NO Modificables) */}
+        {/* 8 Grupos de Clasificación (Requerimiento Técnico 2: Carga Inicial y Desglose Dinámico) */}
+        <section
+          aria-label="Grupos de clasificación"
+          className="mt-6 rounded-2xl border border-orange-200 bg-white p-4 shadow-sm"
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-orange-600" aria-hidden="true" />
+              <h2 className="text-xs font-black tracking-wider text-slate-800 uppercase sm:text-sm">
+                8 Grupos de Clasificación (Filtrado Dinámico)
+              </h2>
+            </div>
+            {selectedGroup !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setSelectedGroup('ALL')}
+                className="inline-flex items-center gap-1 text-xs font-bold text-orange-700 hover:text-orange-900 hover:underline"
+              >
+                <span>Mostrar todos los grupos</span>
+              </button>
+            )}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
+            {/* Botón Todos */}
+            <button
+              type="button"
+              onClick={() => setSelectedGroup('ALL')}
+              className={`flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all ${
+                selectedGroup === 'ALL'
+                  ? 'border-orange-600 bg-orange-600 text-white shadow-md'
+                  : 'border-orange-200 bg-orange-50/50 text-slate-700 hover:border-orange-400 hover:bg-orange-100/70'
+              }`}
+            >
+              <span className="text-xs font-black">TODOS</span>
+              <span className={`text-[10px] font-bold ${selectedGroup === 'ALL' ? 'text-orange-100' : 'text-slate-500'}`}>
+                {draftCatalog.length} medidas
+              </span>
+            </button>
+
+            {/* Los 8 Grupos requeridos por la especificación */}
+            {CLASSIFICATION_GROUPS.map((group) => {
+              const isSelected = selectedGroup === group;
+              const count = groupCounts[group] ?? 0;
+
+              return (
+                <button
+                  key={group}
+                  type="button"
+                  onClick={() => setSelectedGroup(group)}
+                  className={`flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all ${
+                    isSelected
+                      ? 'border-orange-600 bg-orange-600 text-white shadow-md ring-2 ring-orange-500/30'
+                      : 'border-orange-200 bg-orange-50/50 text-slate-800 hover:border-orange-400 hover:bg-orange-100/70'
+                  }`}
+                >
+                  <span className="truncate text-xs font-black tracking-tight">{group}</span>
+                  <span
+                    className={`text-[10px] font-bold ${
+                      isSelected ? 'text-orange-100' : 'text-slate-500'
+                    }`}
+                  >
+                    {count} {count === 1 ? 'medida' : 'medidas'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedGroup !== 'ALL' && (
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-orange-100/80 px-3.5 py-2 text-xs font-bold text-orange-950">
+              <span className="flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-orange-700" />
+                Filtrando por grupo: <strong className="font-black underline">{selectedGroup}</strong>.
+                Mostrando descripciones técnicas completas para este grupo.
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedGroup('ALL')}
+                className="rounded bg-orange-200 px-2 py-0.5 text-[11px] font-extrabold text-orange-900 hover:bg-orange-300"
+              >
+                Quitar filtro
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Tablero de 4 Columnas Fijas (Códigos PT08, PT09, PT 15 - BAHIA, PT 15 - CURVA) */}
         <section
           aria-label="Tablero editable de almacenes"
           className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
         >
           {WAREHOUSES.map((wh) => {
-            const assignedIds = draftWarehouses[wh.id];
+            const rawAssignedIds = draftWarehouses[wh.id];
+            // Filtrado dinámico según grupo seleccionado (Requerimiento Técnico 2)
+            const displayedIds =
+              selectedGroup === 'ALL'
+                ? rawAssignedIds
+                : rawAssignedIds.filter((id) => {
+                    const item = draftCatalogMap.get(id);
+                    return item && item.group === selectedGroup;
+                  });
+
             const isPendingHere = pendingSlotWarehouse === wh.id;
-            const remainingCatalogCount = draftCatalog.length - assignedIds.length;
+            const remainingCatalogCount = draftCatalog.length - rawAssignedIds.length;
             const isDarkOrange = wh.accent === 'blue';
 
             return (
@@ -280,73 +399,100 @@ export function DispatcherView() {
                 key={wh.id}
                 className="flex flex-col rounded-2xl border border-orange-200 bg-white shadow-sm"
               >
-                {/* Cabecera fija no modificable en naranja / naranja claro */}
+                {/* Cabecera fija con código de producto / almacén en naranja / naranja oscuro */}
                 <header
                   className={`flex items-center justify-between rounded-t-2xl px-4 py-3.5 text-white ${
                     isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
                   }`}
                 >
-                  <div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-black tracking-wider uppercase">
+                      {wh.label.replace(/\s+/g, '')}
+                    </span>
                     <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
                   </div>
                   <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
-                    {assignedIds.length}
+                    {displayedIds.length}
+                    {selectedGroup !== 'ALL' && ` / ${rawAssignedIds.length}`}
                   </span>
                 </header>
 
-                {/* Barra de subinfo */}
+                {/* Subinfo de la columna */}
                 <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2 text-[11px] font-semibold text-orange-900/80">
                   <span>Tipos de medida</span>
-                  {assignedIds.length > 0 && (
+                  {rawAssignedIds.length > 0 && (
                     <button
                       type="button"
                       onClick={() => handleClearWarehouse(wh.id)}
                       className="text-orange-800/75 underline-offset-2 transition-colors hover:text-orange-700 hover:underline"
                     >
-                      Limpiar
+                      Limpiar columna
                     </button>
                   )}
                 </div>
 
-                {/* Ranuras editables */}
+                {/* Ranuras editables con Formato de Visualización Completo */}
                 <div className="flex flex-1 flex-col gap-3 p-4">
-                  {assignedIds.length === 0 && !isPendingHere ? (
+                  {displayedIds.length === 0 && !isPendingHere ? (
                     <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 px-4 py-8 text-center">
                       <p className="text-sm font-semibold text-slate-700">
-                        Sin medidas asignadas
+                        {selectedGroup !== 'ALL' && rawAssignedIds.length > 0
+                          ? `Sin medidas en ${selectedGroup}`
+                          : 'Sin medidas asignadas'}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {assignedIds.map((measureId) => (
-                        <div
-                          key={measureId}
-                          className="flex items-center gap-2 rounded-xl border border-orange-200/80 bg-orange-50/40 p-2"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <MeasureDropdown
-                              catalog={draftCatalog}
-                              selectedMeasureId={measureId}
-                              usedMeasureIdsInColumn={assignedIds}
-                              variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
-                              onSelect={(newId) =>
-                                handleReplaceMeasure(wh.id, measureId, newId)
-                              }
-                              onRequestCustomMeasure={() => openCustomModal(wh.id)}
-                            />
-                          </div>
+                      {displayedIds.map((measureId) => {
+                        const measure = draftCatalogMap.get(measureId);
 
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMeasure(wh.id, measureId)}
-                            title="Eliminar / Producto agotado"
-                            aria-label={`Quitar medida de ${wh.label}`}
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 transition-colors hover:border-orange-400 hover:bg-orange-100 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                        return (
+                          <div
+                            key={measureId}
+                            className="flex flex-col gap-1.5 rounded-xl border border-orange-200/90 bg-orange-50/40 p-2.5 shadow-xs"
                           >
-                            <Trash2 className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                        </div>
-                      ))}
+                            <div className="flex items-center justify-between gap-2">
+                              {/* Código de producto + Grupo */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="rounded bg-orange-200/80 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900">
+                                  {wh.label.replace(/\s+/g, '')}
+                                </span>
+                                {measure && (
+                                  <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold text-orange-800">
+                                    {measure.group}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Botón Eliminar de columna */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMeasure(wh.id, measureId)}
+                                title="Eliminar / Producto agotado"
+                                aria-label={`Quitar medida de ${wh.label}`}
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-orange-200 bg-white text-orange-700/70 transition-colors hover:border-orange-400 hover:bg-orange-100 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                              </button>
+                            </div>
+
+                            {/* Selector desplegable con descripción técnica completa */}
+                            <div className="min-w-0 flex-1">
+                              <MeasureDropdown
+                                catalog={draftCatalog}
+                                selectedMeasureId={measureId}
+                                usedMeasureIdsInColumn={rawAssignedIds}
+                                initialGroupFilter={selectedGroup !== 'ALL' ? selectedGroup : null}
+                                variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
+                                onSelect={(newId) =>
+                                  handleReplaceMeasure(wh.id, measureId, newId)
+                                }
+                                onRequestCustomMeasure={() => openCustomModal(wh.id)}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
 
                       {isPendingHere && (
                         <div className="flex items-center gap-2 rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-2">
@@ -354,7 +500,8 @@ export function DispatcherView() {
                             <MeasureDropdown
                               catalog={draftCatalog}
                               selectedMeasureId={null}
-                              usedMeasureIdsInColumn={assignedIds}
+                              usedMeasureIdsInColumn={rawAssignedIds}
+                              initialGroupFilter={selectedGroup !== 'ALL' ? selectedGroup : null}
                               variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
                               placeholder="Elegir medida..."
                               autoOpen
@@ -399,7 +546,7 @@ export function DispatcherView() {
                       <Plus className="h-4 w-4" aria-hidden="true" />
                       {remainingCatalogCount <= 0
                         ? 'Catálogo completo asignado'
-                        : 'Agregar medida'}
+                        : `Agregar medida a ${wh.label}`}
                     </button>
                   </div>
                 </div>
@@ -408,7 +555,7 @@ export function DispatcherView() {
           })}
         </section>
 
-        {/* Botón de Confirmación / Verificación en la parte inferior derecha */}
+        {/* Botón de Confirmación / Verificación hacia Balanza */}
         <div className="mt-6 flex flex-col items-end justify-between gap-3 rounded-2xl border border-orange-200 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center">
           <div className="text-xs font-medium text-slate-600 sm:text-sm">
             {hasUnsavedChanges ? (
@@ -441,6 +588,7 @@ export function DispatcherView() {
       <CustomMeasureModal
         isOpen={isCustomModalOpen}
         defaultWarehouseId={customModalWarehouse}
+        defaultGroup={selectedGroup !== 'ALL' ? selectedGroup : 'Nacional'}
         onClose={() => setIsCustomModalOpen(false)}
         onCreate={handleCreateCustomMeasure}
       />

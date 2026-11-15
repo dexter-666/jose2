@@ -1,13 +1,14 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Check, Plus, Search, X } from 'lucide-react';
-import { MeasureItem } from '../../types/stock';
-import { matchesMeasureQuery } from '../../utils/measures';
+import { ClassificationGroup, MeasureItem } from '../../types/stock';
+import { CLASSIFICATION_GROUPS, matchesMeasureQuery } from '../../utils/measures';
 import { ThicknessIndicator } from '../ThicknessIndicator/ThicknessIndicator';
 
 interface MeasureDropdownProps {
   catalog: MeasureItem[];
   selectedMeasureId: string | null;
   usedMeasureIdsInColumn: string[];
+  initialGroupFilter?: ClassificationGroup | null;
   variant?: 'orange-dark' | 'orange-light';
   placeholder?: string;
   autoOpen?: boolean;
@@ -19,14 +20,18 @@ export function MeasureDropdown({
   catalog,
   selectedMeasureId,
   usedMeasureIdsInColumn,
+  initialGroupFilter = null,
   variant = 'orange-dark',
-  placeholder = 'Seleccionar medida',
+  placeholder = 'Seleccionar medida...',
   autoOpen = false,
   onSelect,
   onRequestCustomMeasure,
 }: MeasureDropdownProps) {
   const [isOpen, setIsOpen] = useState(autoOpen);
   const [query, setQuery] = useState('');
+  const [activeGroupFilter, setActiveGroupFilter] = useState<ClassificationGroup | 'ALL'>(
+    initialGroupFilter ?? 'ALL'
+  );
   const [activeIndex, setActiveIndex] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,15 +39,26 @@ export function MeasureDropdown({
   const searchRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
+  // Sync initial group filter when prop changes
+  useEffect(() => {
+    if (initialGroupFilter) {
+      setActiveGroupFilter(initialGroupFilter);
+    }
+  }, [initialGroupFilter]);
+
   const selectedMeasure = useMemo(
     () => catalog.find((m) => m.id === selectedMeasureId) ?? null,
     [catalog, selectedMeasureId]
   );
 
-  const filteredCatalog = useMemo(
-    () => catalog.filter((item) => matchesMeasureQuery(item.label, query)),
-    [catalog, query]
-  );
+  const filteredCatalog = useMemo(() => {
+    return catalog.filter((item) => {
+      if (activeGroupFilter !== 'ALL' && item.group !== activeGroupFilter) {
+        return false;
+      }
+      return matchesMeasureQuery(item, query);
+    });
+  }, [catalog, activeGroupFilter, query]);
 
   const usedSet = useMemo(() => new Set(usedMeasureIdsInColumn), [usedMeasureIdsInColumn]);
 
@@ -118,9 +134,18 @@ export function MeasureDropdown({
         aria-controls={isOpen ? listboxId : undefined}
         className={`flex w-full items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-left text-sm font-bold text-white shadow-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${headerClasses}`}
       >
-        <span className="truncate font-mono tracking-tight">
-          {selectedMeasure ? selectedMeasure.label : placeholder}
-        </span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate font-mono text-xs font-black tracking-tight sm:text-sm">
+            {selectedMeasure
+              ? selectedMeasure.technicalDescription || selectedMeasure.label
+              : placeholder}
+          </span>
+          {selectedMeasure && (
+            <span className="truncate text-[10px] font-medium text-orange-200">
+              {selectedMeasure.group} · {selectedMeasure.label}
+            </span>
+          )}
+        </div>
 
         {/* Flecha triangular naranja claro */}
         <svg
@@ -134,10 +159,10 @@ export function MeasureDropdown({
         </svg>
       </button>
 
-      {/* Menú desplegable animado con triángulo naranja claro apuntando hacia arriba */}
+      {/* Menú desplegable animado */}
       {isOpen && (
         <div className="animate-dropdown-enter absolute left-0 right-0 top-full mt-2.5 origin-top">
-          {/* Pequeño triángulo conector apuntando hacia arriba */}
+          {/* Triángulo conector apuntando hacia arriba */}
           <div
             className="pointer-events-none absolute -top-[8px] left-6 z-10 h-0 w-0 border-x-[8px] border-b-[8px] border-x-transparent border-b-orange-400 drop-shadow-sm"
             aria-hidden="true"
@@ -160,7 +185,7 @@ export function MeasureDropdown({
                     setActiveIndex(0);
                   }}
                   onKeyDown={handleSearchKeyDown}
-                  placeholder="Buscar medida (ej: 1/2 x 9)..."
+                  placeholder="Buscar descripción técnica (ej: Media x 9 y A 6 15)..."
                   aria-label="Filtrar medidas en selector"
                   className="w-full rounded-md border border-orange-200 bg-white py-1.5 pl-8 pr-7 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
@@ -175,22 +200,58 @@ export function MeasureDropdown({
                   </button>
                 )}
               </div>
+
+              {/* Pestañas de 8 grupos de clasificación dentro del dropdown */}
+              <div className="mt-2 flex flex-wrap gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveGroupFilter('ALL');
+                    setActiveIndex(0);
+                  }}
+                  className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold transition-colors ${
+                    activeGroupFilter === 'ALL'
+                      ? 'bg-orange-600 text-white'
+                      : 'border border-orange-200 bg-white text-orange-900 hover:bg-orange-100'
+                  }`}
+                >
+                  Todos
+                </button>
+                {CLASSIFICATION_GROUPS.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => {
+                      setActiveGroupFilter(g);
+                      setActiveIndex(0);
+                    }}
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold transition-colors ${
+                      activeGroupFilter === g
+                        ? 'bg-orange-600 text-white'
+                        : 'border border-orange-200 bg-white text-orange-900 hover:bg-orange-100'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
               <div className="mt-1 flex items-center justify-between px-1 text-[10px] font-semibold tracking-wide text-orange-800/75 uppercase">
                 <span>Orden: Delgado → Grueso</span>
-                <span>{filteredCatalog.length} opc.</span>
+                <span>{filteredCatalog.length} opciones</span>
               </div>
             </div>
 
-            {/* Lista blanca de opciones */}
+            {/* Lista blanca de opciones con descripción técnica completa */}
             <ul
               id={listboxId}
               role="listbox"
               aria-label="Medidas disponibles"
-              className="custom-scrollbar max-h-56 divide-y divide-orange-50 overflow-y-auto p-1"
+              className="custom-scrollbar max-h-60 divide-y divide-orange-50 overflow-y-auto p-1"
             >
               {filteredCatalog.length === 0 ? (
                 <li className="px-3 py-4 text-center text-xs text-slate-500">
-                  No se encontró "{query}"
+                  No se encontraron medidas coincidentes
                 </li>
               ) : (
                 filteredCatalog.map((item, idx) => {
@@ -220,15 +281,27 @@ export function MeasureDropdown({
                                 : 'text-slate-700 hover:bg-orange-50/60'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
                           <ThicknessIndicator diameterMm={item.diameterMm} highlighted={isSelected} />
-                          <span className="font-mono text-[13px] font-semibold">{item.label}</span>
-                          {item.isCustom && (
-                            <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-800">
-                              Custom
-                            </span>
-                          )}
-                        </span>
+                          <div className="min-w-0 flex-1">
+                            {/* Descripción técnica completa requerida por especificación */}
+                            <div className="truncate font-mono text-[13px] font-bold text-slate-900">
+                              {item.technicalDescription}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                              <span className="font-semibold text-orange-800">
+                                {item.group}
+                              </span>
+                              <span>·</span>
+                              <span>{item.label}</span>
+                              {item.isCustom && (
+                                <span className="rounded bg-orange-100 px-1 text-[9px] font-bold text-orange-800">
+                                  Custom
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
                         {isSelected ? (
                           <Check className="h-4 w-4 shrink-0 text-orange-700" aria-hidden="true" />
@@ -265,4 +338,3 @@ export function MeasureDropdown({
     </div>
   );
 }
-

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Filter, Lock, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Filter, Layers, Lock, Search, X } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
-import { MeasureItem } from '../types/stock';
-import { matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
+import { ClassificationGroup, MeasureItem } from '../types/stock';
+import { CLASSIFICATION_GROUPS, matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
 import { formatTime12h } from '../utils/shifts';
 
 const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4', '1"'] as const;
@@ -12,6 +12,7 @@ const QUICK_FILTER_CHIPS = ['6 mm', '8 mm', '3/8', '12 mm', '1/2', '5/8', '3/4',
 export function ScaleView() {
   const { state, catalogMap, isConnected, recentPulse, dismissPulse } = useStock();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState<ClassificationGroup | 'ALL'>('ALL');
   const [hideNonMatchingColumns, setHideNonMatchingColumns] = useState(false);
 
   const hasQuery = searchQuery.trim().length > 0;
@@ -26,20 +27,28 @@ export function ScaleView() {
     >();
 
     for (const wh of WAREHOUSES) {
-      const measures = state.warehouses[wh.id]
+      const rawMeasures = state.warehouses[wh.id]
         .map((id) => catalogMap.get(id))
         .filter((item): item is MeasureItem => Boolean(item));
 
+      // Filtro por grupo de clasificación si no es 'ALL'
+      const groupScopedMeasures =
+        selectedGroup === 'ALL'
+          ? rawMeasures
+          : rawMeasures.filter((m) => m.group === selectedGroup);
+
       const matchingIds = new Set(
         hasQuery
-          ? measures.filter((m) => matchesMeasureQuery(m.label, searchQuery)).map((m) => m.id)
+          ? groupScopedMeasures
+              .filter((m) => matchesMeasureQuery(m, searchQuery))
+              .map((m) => m.id)
           : []
       );
 
-      map.set(wh.id, { allMeasures: measures, matchingIds });
+      map.set(wh.id, { allMeasures: groupScopedMeasures, matchingIds });
     }
     return map;
-  }, [state.warehouses, catalogMap, hasQuery, searchQuery]);
+  }, [state.warehouses, catalogMap, selectedGroup, hasQuery, searchQuery]);
 
   const matchingWarehouseLabels = useMemo(() => {
     if (!hasQuery) return [];
@@ -139,6 +148,44 @@ export function ScaleView() {
             </div>
           </div>
 
+          {/* Filtro por los 8 Grupos de Clasificación en Balanza */}
+          <div className="mt-4 border-t border-orange-100 pt-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-2 flex items-center gap-1 text-[11px] font-bold tracking-wide text-slate-600 uppercase">
+                <Layers className="h-3 w-3 text-orange-600" />
+                Grupos:
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedGroup('ALL')}
+                className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
+                  selectedGroup === 'ALL'
+                    ? 'bg-orange-600 text-white shadow-sm'
+                    : 'border border-orange-200 bg-orange-50/60 text-slate-700 hover:bg-orange-100'
+                }`}
+              >
+                Todos
+              </button>
+              {CLASSIFICATION_GROUPS.map((g) => {
+                const isActive = selectedGroup === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setSelectedGroup(isActive ? 'ALL' : g)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-orange-600 text-white shadow-sm'
+                        : 'border border-orange-200 bg-orange-50/60 text-slate-700 hover:bg-orange-100'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Notificación en tiempo real cuando Despachador confirma un cambio */}
           {recentPulse && (
             <div
@@ -212,7 +259,7 @@ export function ScaleView() {
           )}
         </section>
 
-        {/* Tablero de 4 Columnas Fijas (Solo Lectura) */}
+        {/* Tablero de 4 Columnas Fijas (Solo Lectura con Código y Texto Completo de Medidas) */}
         <section
           aria-label="Columnas de stock por almacén"
           className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
@@ -255,13 +302,16 @@ export function ScaleView() {
                           : 'border-orange-200 shadow-sm'
                   }`}
                 >
-                  {/* Cabecera fija del almacén en naranja / naranja claro */}
+                  {/* Cabecera fija del almacén con código en naranja / naranja oscuro */}
                   <header
                     className={`flex items-center justify-between px-4 py-3.5 text-white ${
                       isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
                     }`}
                   >
-                    <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-black tracking-wider uppercase">
+                        {wh.label.replace(/\s+/g, '')}
+                      </span>
                       <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
                     </div>
                     {isHighlightedColumn ? (
@@ -275,18 +325,20 @@ export function ScaleView() {
                     )}
                   </header>
 
-                  {/* Subtítulo estático requerido */}
+                  {/* Subtítulo de columna */}
                   <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2">
                     <h3 className="text-xs font-bold tracking-wide text-orange-950 uppercase">
                       Tipos de medida
                     </h3>
                   </div>
 
-                  {/* Tarjetas estáticas de solo lectura */}
+                  {/* Tarjetas estáticas de solo lectura: DATOS OBLIGATORIOS (Código + Texto Completo) */}
                   <div className="flex-1 p-4">
                     {info.allMeasures.length === 0 ? (
                       <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
-                        Sin medidas registradas en este almacén
+                        {selectedGroup !== 'ALL'
+                          ? `Sin medidas en ${selectedGroup}`
+                          : 'Sin medidas registradas en este almacén'}
                       </div>
                     ) : (
                       <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>
@@ -301,7 +353,7 @@ export function ScaleView() {
                           return (
                             <li
                               key={`${measure.id}-${isPulsingItem ? recentPulse?.pulseKey : 'idle'}`}
-                              className={`flex items-center justify-between gap-3 rounded-xl border px-3.5 py-3 transition-all ${
+                              className={`flex flex-col gap-1.5 rounded-xl border p-3 transition-all ${
                                 isMatch
                                   ? 'border-orange-500 bg-orange-100 shadow-sm ring-2 ring-orange-400/50'
                                   : isPulsingItem
@@ -311,25 +363,58 @@ export function ScaleView() {
                                       : 'border-orange-200/80 bg-orange-50/50'
                               }`}
                             >
-                              <div className="flex items-center gap-2.5">
-                                <ThicknessIndicator
-                                  diameterMm={measure.diameterMm}
-                                  highlighted={isMatch}
-                                />
-                                <span
-                                  className={`font-mono text-base font-bold tracking-tight ${
-                                    isMatch ? 'text-orange-800' : 'text-slate-900'
-                                  }`}
-                                >
-                                  {measure.label}
-                                </span>
+                              {/* Fila Superior: Código de Producto + Grupo de Clasificación */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  {/* CÓDIGO OBLIGATORIO DEL PRODUCTO */}
+                                  <span className="rounded bg-orange-200/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-950 uppercase">
+                                    {wh.label.replace(/\s+/g, '')}
+                                  </span>
+                                  {/* GRUPO DE CLASIFICACIÓN */}
+                                  <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-orange-800 shadow-2xs">
+                                    {measure.group}
+                                  </span>
+                                </div>
+
+                                {isMatch && (
+                                  <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase">
+                                    Coincide
+                                  </span>
+                                )}
                               </div>
 
-                              {isMatch && (
-                                <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase">
-                                  Disponible
-                                </span>
-                              )}
+                              {/* Fila Principal: TEXTO COMPLETO DE MEDIDAS Y MÉTRICAS EXACTAS */}
+                              <div className="flex items-start gap-2.5 pt-0.5">
+                                <div className="pt-1">
+                                  <ThicknessIndicator
+                                    diameterMm={measure.diameterMm}
+                                    highlighted={isMatch}
+                                  />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  {/* Descripción técnica completa (ej: "Media x 9 y A 6 15") */}
+                                  <div
+                                    className={`font-mono text-sm font-extrabold tracking-tight sm:text-base ${
+                                      isMatch ? 'text-orange-900' : 'text-slate-900'
+                                    }`}
+                                  >
+                                    {measure.technicalDescription}
+                                  </div>
+
+                                  {/* Métricas exactas (ej: "1/2\" x 9 m · Ø 12.70 mm · 9 m") */}
+                                  <div className="mt-0.5 flex flex-wrap items-center gap-1.5 font-mono text-xs font-semibold text-slate-600">
+                                    <span className="text-orange-800">{measure.label}</span>
+                                    <span>·</span>
+                                    <span>Ø {measure.diameterMm.toFixed(2)} mm</span>
+                                    {measure.lengthM > 0 && (
+                                      <>
+                                        <span>·</span>
+                                        <span>{measure.lengthM} m</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </li>
                           );
                         })}

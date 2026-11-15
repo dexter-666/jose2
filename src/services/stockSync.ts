@@ -8,6 +8,9 @@ import {
 import {
   INITIAL_CATALOG,
   INITIAL_WAREHOUSE_STOCK,
+  inferClassificationGroup,
+  inferTechnicalDescription,
+  isClassificationGroup,
   sortCatalogMeasures,
   sortMeasureIdsByCatalog,
   WAREHOUSES,
@@ -88,15 +91,31 @@ export function sanitizeStockState(raw: unknown): StockState | null {
   if (!rawCatalog) return null;
 
   const validCatalog = sortCatalogMeasures(
-    rawCatalog.filter(
-      (item): item is MeasureItem =>
-        Boolean(item) &&
-        typeof item === 'object' &&
-        typeof (item as MeasureItem).id === 'string' &&
-        typeof (item as MeasureItem).label === 'string' &&
-        typeof (item as MeasureItem).diameterMm === 'number' &&
-        typeof (item as MeasureItem).lengthM === 'number'
-    )
+    rawCatalog
+      .filter(
+        (item): item is MeasureItem =>
+          Boolean(item) &&
+          typeof item === 'object' &&
+          typeof (item as MeasureItem).id === 'string' &&
+          typeof (item as MeasureItem).label === 'string' &&
+          typeof (item as MeasureItem).diameterMm === 'number' &&
+          typeof (item as MeasureItem).lengthM === 'number'
+      )
+      .map((item) => {
+        const group = isClassificationGroup(item.group)
+          ? item.group
+          : inferClassificationGroup(item.label, item.technicalDescription);
+        const technicalDescription =
+          typeof item.technicalDescription === 'string' &&
+          item.technicalDescription.trim().length > 0
+            ? item.technicalDescription
+            : inferTechnicalDescription(item.label, group);
+        return {
+          ...item,
+          group,
+          technicalDescription,
+        };
+      })
   );
 
   if (validCatalog.length === 0) return null;
