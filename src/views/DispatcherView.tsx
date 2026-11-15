@@ -148,7 +148,7 @@ export function DispatcherView() {
 
     const newMeasure = buildMeasureItem(trimmed, {
       isCustom: true,
-      group: options?.group ?? (selectedGroup !== 'ALL' ? selectedGroup : 'Nacional'),
+      group: options?.group ?? (selectedGroup !== 'ALL' ? selectedGroup : 'NACIONAL'),
       technicalDescription: options?.technicalDescription,
       overrideDiameterMm: options?.overrideDiameterMm,
       overrideLengthM: options?.overrideLengthM,
@@ -453,13 +453,18 @@ export function DispatcherView() {
                           >
                             <div className="flex items-center justify-between gap-2">
                               {/* Código de producto + Grupo */}
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex flex-wrap items-center gap-1.5">
                                 <span className="rounded bg-orange-200/80 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900">
                                   {wh.label.replace(/\s+/g, '')}
                                 </span>
                                 {measure && (
                                   <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold text-orange-800">
                                     {measure.group}
+                                  </span>
+                                )}
+                                {measure?.sapCode && (
+                                  <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 shadow-2xs border border-orange-200/60">
+                                    SAP: {measure.sapCode}
                                   </span>
                                 )}
                               </div>
@@ -588,7 +593,7 @@ export function DispatcherView() {
       <CustomMeasureModal
         isOpen={isCustomModalOpen}
         defaultWarehouseId={customModalWarehouse}
-        defaultGroup={selectedGroup !== 'ALL' ? selectedGroup : 'Nacional'}
+        defaultGroup={selectedGroup !== 'ALL' ? selectedGroup : 'NACIONAL'}
         onClose={() => setIsCustomModalOpen(false)}
         onCreate={handleCreateCustomMeasure}
       />

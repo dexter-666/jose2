@@ -99,14 +99,14 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByText(/hora de modificación:/i)).toBeInTheDocument();
 
     // 8 grupos de clasificación requeridos
-    expect(screen.getByRole('button', { name: /^nacional/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^fhab/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^importado/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^recox/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^dimensionado/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^especial/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^planchas/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^perfiles/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^fehab/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^nacional\s+\d+ medidas/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^fecoxi/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^fm/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^exportación/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^nacional soldable/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^semi-terminado/i })).toBeInTheDocument();
 
     // 4 Columnas con sus códigos
     expect(screen.getByRole('heading', { name: 'PT 08' })).toBeInTheDocument();
@@ -114,8 +114,8 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByRole('heading', { name: 'PT 15 - BAHIA' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - CURVA' })).toBeInTheDocument();
 
-    // Filtrar por grupo "Nacional"
-    fireEvent.click(screen.getByRole('button', { name: /^nacional/i }));
+    // Filtrar por grupo "NACIONAL"
+    fireEvent.click(screen.getByRole('button', { name: /^nacional\s+\d+ medidas/i }));
     expect(screen.getByText(/filtrando por grupo:/i)).toBeInTheDocument();
 
     // Confirmado / Verificado guarda a Balanza
@@ -136,13 +136,13 @@ describe('Stock por Balanza application', () => {
     expect(screen.queryByText(/delgado → grueso/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/en stock/i)).not.toBeInTheDocument();
 
-    // Cada registro obligatorio muestra el código de producto (PT08, etc.) y descripción técnica (Media x 9 y A 6 15)
+    // Cada registro obligatorio muestra el código de producto (PT08, etc.) y código SAP
     expect(screen.getAllByText('PT08').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Media x 9 y A 6 15').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/sap 110000257/i).length).toBeGreaterThan(0);
 
     // Buscador
     const searchInput = screen.getByPlaceholderText(/^buscar medida\.\.\.$/i);
-    fireEvent.change(searchInput, { target: { value: 'Media' } });
+    fireEvent.change(searchInput, { target: { value: '12mm' } });
     expect(screen.getByText(/disponible en:/i)).toBeInTheDocument();
   });
 
@@ -155,14 +155,14 @@ describe('Stock por Balanza application', () => {
     const labelInput = screen.getByLabelText(/medida \/ dimensión/i);
     fireEvent.change(labelInput, { target: { value: '10 mm' } });
     fireEvent.change(screen.getByLabelText(/grupo de clasificación/i), {
-      target: { value: 'Nacional' },
+      target: { value: 'NACIONAL' },
     });
     fireEvent.change(screen.getByLabelText(/asignar a columna/i), {
       target: { value: 'PT_08' },
     });
     fireEvent.click(screen.getByRole('button', { name: /guardar medida/i }));
 
-    expect(screen.getByText(/medida "10 mm - Nacional" agregada/i)).toBeInTheDocument();
+    expect(screen.getByText(/agregada al grupo nacional/i)).toBeInTheDocument();
   });
 
   it('syncs across devices via /api/stock when cloud Redis is configured', async () => {

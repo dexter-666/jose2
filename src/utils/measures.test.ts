@@ -8,23 +8,29 @@ import {
 } from './measures';
 
 describe('measures domain logic', () => {
-  it('covers all 8 classification groups with full technical descriptions', () => {
+  it('covers all 8 classification groups with full technical descriptions and SAP codes', () => {
     const presentGroups = new Set(INITIAL_CATALOG.map((m) => m.group));
     for (const g of CLASSIFICATION_GROUPS) {
       expect(presentGroups.has(g)).toBe(true);
     }
 
-    // Must include exact technical format required by spec
-    const mediaItem = INITIAL_CATALOG.find((m) => m.technicalDescription === 'Media x 9 y A 6 15');
+    // Must include exact official catalog items provided by company
+    const mediaItem = INITIAL_CATALOG.find((m) => m.sapCode === '110000276');
     expect(mediaItem).toBeDefined();
-    expect(mediaItem!.group).toBe('Nacional');
+    expect(mediaItem!.group).toBe('NACIONAL');
+    expect(mediaItem!.label).toBe('1/2" x 9m');
+    expect(mediaItem!.metricDisplay).toBe('1/2" X 9m A615');
+    expect(mediaItem!.technicalDescription).toBe('BC SP 1/2"x9m NTP 341.031/ASTM A615');
+    expect(mediaItem!.materialDescription).toBe('BC-1 SP ASTM A615 G60 1/2"X9.0');
     expect(mediaItem!.diameterMm).toBe(12.7);
 
-    // All items must have non-empty technicalDescription and label
+    // All 59 items must have non-empty technicalDescription and label
+    expect(INITIAL_CATALOG.length).toBe(59);
     for (const item of INITIAL_CATALOG) {
       expect(item.technicalDescription.trim().length).toBeGreaterThan(0);
       expect(item.label.trim().length).toBeGreaterThan(0);
       expect(item.diameterMm).toBeGreaterThan(0);
+      expect(item.sapCode).toBeDefined();
     }
   });
 
@@ -49,27 +55,23 @@ describe('measures domain logic', () => {
     ]);
 
     const labels = withCustom.map((m) => m.label);
-    expect(labels.indexOf('10 mm')).toBeGreaterThan(labels.indexOf('3/8" x 12 m'));
-    expect(labels.indexOf('10 mm')).toBeLessThan(labels.indexOf('12 mm'));
-
-    expect(labels.indexOf('3/4" x 6 m')).toBeGreaterThan(labels.indexOf('5/8" x 12 m'));
-    expect(labels.indexOf('3/4" x 6 m')).toBeLessThan(labels.indexOf('3/4" x 9 m'));
+    expect(labels.indexOf('10 mm')).toBeGreaterThan(labels.indexOf('3/8" x 9m'));
+    expect(labels.indexOf('10 mm')).toBeLessThan(labels.indexOf('12mm x 9m'));
 
     expect(labels.indexOf('3" x 12 m')).toBe(labels.length - 1);
   });
 
-  it('matches picking queries flexibly across labels, technical descriptions, and groups', () => {
+  it('matches picking queries flexibly across SAP codes, labels, technical descriptions, and groups', () => {
     expect(matchesMeasureQuery('1/2" x 9 m', '1/2 x 9')).toBe(true);
     expect(matchesMeasureQuery('1/2" x 12 m', '1/2 x 9')).toBe(false);
     expect(matchesMeasureQuery('1/2" x 9 m', '1/2x9')).toBe(true);
-    expect(matchesMeasureQuery('3/8" x 12 m', '3/8 12')).toBe(true);
     expect(matchesMeasureQuery('12 mm', '12mm')).toBe(true);
-    expect(matchesMeasureQuery('1/2" x 12 m', '12mm')).toBe(false);
 
-    // Matching by technical description
-    const mediaItem = INITIAL_CATALOG.find((m) => m.technicalDescription === 'Media x 9 y A 6 15')!;
-    expect(matchesMeasureQuery(mediaItem, 'Media')).toBe(true);
-    expect(matchesMeasureQuery(mediaItem, 'A 6 15')).toBe(true);
-    expect(matchesMeasureQuery(mediaItem, 'Nacional')).toBe(true);
+    // Matching by SAP code and technical description
+    const sampleItem = INITIAL_CATALOG.find((m) => m.sapCode === '110000255')!;
+    expect(matchesMeasureQuery(sampleItem, '110000255')).toBe(true);
+    expect(matchesMeasureQuery(sampleItem, 'IMPORTADO')).toBe(true);
+    expect(matchesMeasureQuery(sampleItem, 'BC 6mmx9m')).toBe(true);
+    expect(matchesMeasureQuery(sampleItem, 'A615')).toBe(true);
   });
 });

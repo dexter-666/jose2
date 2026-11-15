@@ -29,7 +29,7 @@ export function CustomMeasureModal({
 }: CustomMeasureModalProps) {
   const [label, setLabel] = useState('');
   const [technicalDescription, setTechnicalDescription] = useState('');
-  const [group, setGroup] = useState<ClassificationGroup>(defaultGroup ?? 'Nacional');
+  const [group, setGroup] = useState<ClassificationGroup>(defaultGroup ?? 'NACIONAL');
   const [manualDiameter, setManualDiameter] = useState('');
   const [assignWarehouse, setAssignWarehouse] = useState<WarehouseId | ''>(
     defaultWarehouseId ?? ''
@@ -41,7 +41,7 @@ export function CustomMeasureModal({
     if (isOpen) {
       setLabel('');
       setTechnicalDescription('');
-      setGroup(defaultGroup ?? 'Nacional');
+      setGroup(defaultGroup ?? 'NACIONAL');
       setManualDiameter('');
       setAssignWarehouse(defaultWarehouseId ?? '');
       setError(null);

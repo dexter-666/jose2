@@ -1,14 +1,14 @@
 export type WarehouseId = 'PT_08' | 'PT_09' | 'PT_15_BAHIA' | 'PT_15_CURVA';
 
 export type ClassificationGroup =
-  | 'Nacional'
-  | 'Fhab'
-  | 'Importado'
-  | 'Recox'
-  | 'Dimensionado'
-  | 'Especial'
-  | 'Planchas'
-  | 'Perfiles';
+  | 'IMPORTADO'
+  | 'FEHAB'
+  | 'NACIONAL'
+  | 'FECOXI'
+  | 'FM'
+  | 'EXPORTACIÓN'
+  | 'NACIONAL SOLDABLE'
+  | 'SEMI-TERMINADO';
 
 export type UserRole = 'despachador' | 'balanza';
 
@@ -30,9 +30,16 @@ export interface WarehouseDefinition {
 
 export interface MeasureItem {
   id: string;
+  sapCode?: string;
   label: string;
-  /** Full technical description format required by spec, e.g. "Media x 9 y A 6 15" */
+  metric?: string;
+  length?: string;
+  quality?: string;
+  metricDisplay?: string;
+  /** Full technical description format required by spec */
   technicalDescription: string;
+  /** Official material description for Balanza view */
+  materialDescription?: string;
   /** One of the 8 required classification groups */
   group: ClassificationGroup;
   /** Calculated or user-provided diameter in mm for strict thin-to-thick sorting */

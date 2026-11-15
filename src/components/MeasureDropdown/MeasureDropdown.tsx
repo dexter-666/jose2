@@ -137,12 +137,13 @@ export function MeasureDropdown({
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate font-mono text-xs font-black tracking-tight sm:text-sm">
             {selectedMeasure
-              ? selectedMeasure.technicalDescription || selectedMeasure.label
+              ? selectedMeasure.metricDisplay || selectedMeasure.label
               : placeholder}
           </span>
           {selectedMeasure && (
             <span className="truncate text-[10px] font-medium text-orange-200">
-              {selectedMeasure.group} · {selectedMeasure.label}
+              {selectedMeasure.sapCode ? `[${selectedMeasure.sapCode}] ` : ''}
+              {selectedMeasure.technicalDescription}
             </span>
           )}
         </div>
@@ -284,16 +285,23 @@ export function MeasureDropdown({
                         <div className="flex min-w-0 flex-1 items-center gap-2">
                           <ThicknessIndicator diameterMm={item.diameterMm} highlighted={isSelected} />
                           <div className="min-w-0 flex-1">
-                            {/* Descripción técnica completa requerida por especificación */}
-                            <div className="truncate font-mono text-[13px] font-bold text-slate-900">
+                            {/* Métrica X Longitud Calidad (Segunda vista despachador) */}
+                            <div className="truncate font-mono text-[13px] font-black text-slate-900">
+                              {item.metricDisplay || item.label}
+                            </div>
+                            {/* Descripción técnica completa */}
+                            <div className="truncate text-[11px] font-medium text-slate-600">
                               {item.technicalDescription}
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                              <span className="font-semibold text-orange-800">
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
+                              <span className="rounded bg-orange-100/90 px-1 font-bold text-orange-900">
                                 {item.group}
                               </span>
-                              <span>·</span>
-                              <span>{item.label}</span>
+                              {item.sapCode && (
+                                <span className="font-mono text-slate-600">
+                                  SAP: {item.sapCode}
+                                </span>
+                              )}
                               {item.isCustom && (
                                 <span className="rounded bg-orange-100 px-1 text-[9px] font-bold text-orange-800">
                                   Custom

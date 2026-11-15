@@ -363,17 +363,23 @@ export function ScaleView() {
                                       : 'border-orange-200/80 bg-orange-50/50'
                               }`}
                             >
-                              {/* Fila Superior: Código de Producto + Grupo de Clasificación */}
+                              {/* Fila Superior: Código de Producto + Clasificación + Código SAP */}
                               <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex flex-wrap items-center gap-1.5">
                                   {/* CÓDIGO OBLIGATORIO DEL PRODUCTO */}
                                   <span className="rounded bg-orange-200/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-950 uppercase">
                                     {wh.label.replace(/\s+/g, '')}
                                   </span>
-                                  {/* GRUPO DE CLASIFICACIÓN */}
-                                  <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-orange-800 shadow-2xs">
+                                  {/* CLASIFICACIÓN (VISTA FINAL BALANZA) */}
+                                  <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-extrabold text-orange-800 shadow-2xs border border-orange-200/70 uppercase">
                                     {measure.group}
                                   </span>
+                                  {/* CÓDIGO SAP (VISTA FINAL BALANZA) */}
+                                  {measure.sapCode && (
+                                    <span className="rounded bg-orange-100/90 px-1.5 py-0.5 font-mono text-[10px] font-black text-orange-900 border border-orange-200/80">
+                                      SAP {measure.sapCode}
+                                    </span>
+                                  )}
                                 </div>
 
                                 {isMatch && (
@@ -383,7 +389,7 @@ export function ScaleView() {
                                 )}
                               </div>
 
-                              {/* Fila Principal: TEXTO COMPLETO DE MEDIDAS Y MÉTRICAS EXACTAS */}
+                              {/* Fila Principal: MATERIAL / TEXTO COMPLETO DE MEDIDAS Y MÉTRICAS */}
                               <div className="flex items-start gap-2.5 pt-0.5">
                                 <div className="pt-1">
                                   <ThicknessIndicator
@@ -392,18 +398,18 @@ export function ScaleView() {
                                   />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  {/* Descripción técnica completa (ej: "Media x 9 y A 6 15") */}
+                                  {/* Material / Descripción técnica para Balanza */}
                                   <div
                                     className={`font-mono text-sm font-extrabold tracking-tight sm:text-base ${
                                       isMatch ? 'text-orange-900' : 'text-slate-900'
                                     }`}
                                   >
-                                    {measure.technicalDescription}
+                                    {measure.materialDescription || measure.technicalDescription}
                                   </div>
 
-                                  {/* Métricas exactas (ej: "1/2\" x 9 m · Ø 12.70 mm · 9 m") */}
+                                  {/* Métrica desplegada y detalles técnicos */}
                                   <div className="mt-0.5 flex flex-wrap items-center gap-1.5 font-mono text-xs font-semibold text-slate-600">
-                                    <span className="text-orange-800">{measure.label}</span>
+                                    <span className="text-orange-800 font-bold">{measure.metricDisplay || measure.label}</span>
                                     <span>·</span>
                                     <span>Ø {measure.diameterMm.toFixed(2)} mm</span>
                                     {measure.lengthM > 0 && (

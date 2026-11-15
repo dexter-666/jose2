@@ -31,17 +31,17 @@ export const WAREHOUSES: readonly WarehouseDefinition[] = [
 ] as const;
 
 /**
- * Exact 8 classification groups required by the technical specification.
+ * Exact 8 classification groups required by the technical specification (Primera vista para despachador).
  */
 export const CLASSIFICATION_GROUPS: readonly ClassificationGroup[] = [
-  'Nacional',
-  'Fhab',
-  'Importado',
-  'Recox',
-  'Dimensionado',
-  'Especial',
-  'Planchas',
-  'Perfiles',
+  'IMPORTADO',
+  'FEHAB',
+  'NACIONAL',
+  'FECOXI',
+  'FM',
+  'EXPORTACIÓN',
+  'NACIONAL SOLDABLE',
+  'SEMI-TERMINADO',
 ] as const;
 
 export function isClassificationGroup(val: unknown): val is ClassificationGroup {
@@ -50,294 +50,839 @@ export function isClassificationGroup(val: unknown): val is ClassificationGroup 
 
 const INCH_TO_MM = 25.4;
 
-export interface RawCatalogSeed {
-  label: string;
-  technicalDescription: string;
-  group: ClassificationGroup;
-  overrideDiameterMm?: number;
-  overrideLengthM?: number;
-}
-
 /**
- * Standard seed catalog covering all 8 classification groups
- * with exact technical description formats (e.g., "Media x 9 y A 6 15").
+ * Official catalog seeds covering all 8 classification groups
+ * directly provided by user specification with SAP codes and descriptions.
  */
-export const SEED_CATALOG_DEFINITIONS: readonly RawCatalogSeed[] = [
-  // 1) Nacional (Barras de Construcción Nacional NTP 341.031 / ASTM A615 Grado 60)
+export const SEED_CATALOG_DEFINITIONS: readonly MeasureItem[] = [
   {
-    label: '6 mm',
-    technicalDescription: '6 mm x 9 y NTP 341',
-    group: 'Nacional',
-    overrideDiameterMm: 6,
-    overrideLengthM: 9,
+    id: "sap_110000255",
+    sapCode: "110000255",
+    label: "6mm x 9m",
+    metric: "6mm",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "6mm X 9m A615",
+    technicalDescription: "BC 6mmx9m NTP 341.031/ASTM A615",
+    materialDescription: "BC 6MMX9M NTP 341.031/ASTM A61",
+    group: "IMPORTADO",
+    diameterMm: 6,
+    lengthM: 9,
   },
   {
-    label: '8 mm',
-    technicalDescription: '8 mm x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 8,
-    overrideLengthM: 9,
+    id: "sap_110000263",
+    sapCode: "110000263",
+    label: "1/2\" x 9m",
+    metric: "1/2\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9m A615",
+    technicalDescription: "BC 1/2\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC 1/2\"x9m NTP 341.031/ASTM A615",
+    group: "IMPORTADO",
+    diameterMm: 12.7,
+    lengthM: 9,
   },
   {
-    label: '3/8" x 9 m',
-    technicalDescription: '3/8 x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 9.525,
-    overrideLengthM: 9,
+    id: "sap_110000265",
+    sapCode: "110000265",
+    label: "8mm x 9m",
+    metric: "8mm",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "8mm X 9m A615",
+    technicalDescription: "BC 8mmx9m NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 8X9000MM A615",
+    group: "IMPORTADO",
+    diameterMm: 8,
+    lengthM: 9,
   },
   {
-    label: '12 mm',
-    technicalDescription: '12 mm x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 12,
-    overrideLengthM: 9,
+    id: "sap_110000266",
+    sapCode: "110000266",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9m A615",
+    technicalDescription: "BC 3/8\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 3/8\"X9000MM A615",
+    group: "IMPORTADO",
+    diameterMm: 9.525,
+    lengthM: 9,
   },
   {
-    label: '1/2" x 9 m',
-    technicalDescription: 'Media x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 12.7,
-    overrideLengthM: 9,
+    id: "sap_110300507",
+    sapCode: "110300507",
+    label: "5/8\" x 9m",
+    metric: "5/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9m A615",
+    technicalDescription: "BC 5/8\"X9M NTP 341.031/ASTM A615",
+    materialDescription: "BC 5/8\"X9M NTP 341.031/ASTM A615",
+    group: "IMPORTADO",
+    diameterMm: 15.875,
+    lengthM: 9,
   },
   {
-    label: '5/8" x 9 m',
-    technicalDescription: '5/8 x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 15.875,
-    overrideLengthM: 9,
+    id: "sap_110500143",
+    sapCode: "110500143",
+    label: "1.3/8\" x 12m",
+    metric: "1.3/8\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1.3/8\" X 12m A615",
+    technicalDescription: "BC SP 1.3/8\"x12m FH NTP341.031/ASTM A615",
+    materialDescription: "BC SP 1.3/8\"x12m FH NTP341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 34.925,
+    lengthM: 12,
   },
   {
-    label: '3/4" x 9 m',
-    technicalDescription: '3/4 x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 19.05,
-    overrideLengthM: 9,
+    id: "sap_110500144",
+    sapCode: "110500144",
+    label: "1\" x 9m",
+    metric: "1\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1\" X 9m A615",
+    technicalDescription: "BC 1\"X9m SP FH NTP 341.031/ASTM A615",
+    materialDescription: "BC 1\"X9m SP FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 25.4,
+    lengthM: 9,
   },
   {
-    label: '1" x 9 m',
-    technicalDescription: '1 x 9 y A 6 15',
-    group: 'Nacional',
-    overrideDiameterMm: 25.4,
-    overrideLengthM: 9,
+    id: "sap_110500145",
+    sapCode: "110500145",
+    label: "5/8\" x 9m",
+    metric: "5/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9m A615",
+    technicalDescription: "BC 5/8\"X9m SP FH NTP 341.031/ASTM A615",
+    materialDescription: "BC 5/8\"X9m SP FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 15.875,
+    lengthM: 9,
   },
+  {
+    id: "sap_110500146",
+    sapCode: "110500146",
+    label: "3/4\" x 9m",
+    metric: "3/4\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/4\" X 9m A615",
+    technicalDescription: "BC SP 3/4\"x9m FH NTP 341.031/ASTM A615",
+    materialDescription: "BC SP 3/4\"x9m FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 19.05,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110500147",
+    sapCode: "110500147",
+    label: "1\" x 12m",
+    metric: "1\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1\" X 12m A615",
+    technicalDescription: "BC SP 1\"x12m FH NTP 341.031/ASTM A615",
+    materialDescription: "BC SP 1\"x12m FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 25.4,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110500148",
+    sapCode: "110500148",
+    label: "3/4\" x 12m",
+    metric: "3/4\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "3/4\" X 12m A615",
+    technicalDescription: "BC SP 3/4\"x12m FH NTP 341.031/ASTM A615",
+    materialDescription: "BC SP 3/4\"x12m FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 19.05,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110500149",
+    sapCode: "110500149",
+    label: "5/8\" x 12m",
+    metric: "5/8\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 12m A615",
+    technicalDescription: "BC SP 5/8\"x12m FH NTP 341.031/ASTM A615",
+    materialDescription: "BC SP 5/8\"x12m FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 15.875,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110500150",
+    sapCode: "110500150",
+    label: "1/2\" x 12m",
+    metric: "1/2\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 12m A615",
+    technicalDescription: "BC SP 1/2\"x12m FH NTP 341.031/ASTM A615",
+    materialDescription: "BC SP 1/2\"x12m FH NTP 341.031/ASTM A615",
+    group: "FEHAB",
+    diameterMm: 12.7,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110502186",
+    sapCode: "110502186",
+    label: "5/8\" x 12m",
+    metric: "5/8\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "5/8\" X 12m A706",
+    technicalDescription: "BC SP 5/8\"x12m FH NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 5/8\"x12m FH NTP 339.186/ASTM A706",
+    group: "FEHAB",
+    diameterMm: 15.875,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110502187",
+    sapCode: "110502187",
+    label: "3/4\" x 12m",
+    metric: "3/4\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "3/4\" X 12m A706",
+    technicalDescription: "BC SP 3/4\"x12m FH NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 3/4\"x12m FH NTP 339.186/ASTM A706",
+    group: "FEHAB",
+    diameterMm: 19.05,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110502190",
+    sapCode: "110502190",
+    label: "1.3/8\" x 12m",
+    metric: "1.3/8\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "1.3/8\" X 12m A706",
+    technicalDescription: "BC SP 1.3/8\"x12m FH NTP339.186/ASTM A706",
+    materialDescription: "BC SP 1.3/8\"x12m FH NTP339.186/ASTM A706",
+    group: "FEHAB",
+    diameterMm: 34.925,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110721512",
+    sapCode: "110721512",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A706",
+    metricDisplay: "3/8\" X 9m A706",
+    technicalDescription: "BC SP 3/8\"X9M FH NTP339.186/ASTM A706",
+    materialDescription: "BC SP 3/8\"X9M FH NTP339.186/ASTM A706",
+    group: "FEHAB",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000257",
+    sapCode: "110000257",
+    label: "12mm x 9m",
+    metric: "12mm",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "12mm X 9m A615",
+    technicalDescription: "BC SP 12mmx9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 12.0X9.0",
+    group: "NACIONAL",
+    diameterMm: 12,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000271",
+    sapCode: "110000271",
+    label: "1/2\" x 12m",
+    metric: "1/2\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 12m A615",
+    technicalDescription: "BC SP 1/2\"x12m NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR SP 1/2\"X12  A615",
+    group: "NACIONAL",
+    diameterMm: 12.7,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000272",
+    sapCode: "110000272",
+    label: "1\" x 12m",
+    metric: "1\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1\" X 12m A615",
+    technicalDescription: "BC SP 1\"x12m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 1\"X12.00",
+    group: "NACIONAL",
+    diameterMm: 25.4,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000273",
+    sapCode: "110000273",
+    label: "1.3/8\" x 12m",
+    metric: "1.3/8\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "1.3/8\" X 12m A615",
+    technicalDescription: "BC SP 1.3/8\"x12m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP A615 G60 1.3/8\"X12M",
+    group: "NACIONAL",
+    diameterMm: 34.925,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000274",
+    sapCode: "110000274",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9m A615",
+    technicalDescription: "BC SP 3/8\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 3/8\"X9.0",
+    group: "NACIONAL",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000276",
+    sapCode: "110000276",
+    label: "1/2\" x 9m",
+    metric: "1/2\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9m A615",
+    technicalDescription: "BC SP 1/2\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 1/2\"X9.0",
+    group: "NACIONAL",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000277",
+    sapCode: "110000277",
+    label: "5/8\" x 9m",
+    metric: "5/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9m A615",
+    technicalDescription: "BC SP 5/8\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 5/8\"X9.0",
+    group: "NACIONAL",
+    diameterMm: 15.875,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000280",
+    sapCode: "110000280",
+    label: "5/8\" x 12m",
+    metric: "5/8\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 12m A615",
+    technicalDescription: "BC SP 5/8\"x12m NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR SP 5/8\"X12M A615",
+    group: "NACIONAL",
+    diameterMm: 15.875,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000283",
+    sapCode: "110000283",
+    label: "3/4\" x 12m",
+    metric: "3/4\"",
+    length: "12m",
+    quality: "A615",
+    metricDisplay: "3/4\" X 12m A615",
+    technicalDescription: "BC SP 3/4\"x12m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP  A615 G60 3/4\"X12.0M",
+    group: "NACIONAL",
+    diameterMm: 19.05,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000286",
+    sapCode: "110000286",
+    label: "1\" x 9m",
+    metric: "1\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1\" X 9m A615",
+    technicalDescription: "BC SP 1\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP ASTM A615 G60 1\"X9.00M",
+    group: "NACIONAL",
+    diameterMm: 25.4,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000287",
+    sapCode: "110000287",
+    label: "3/4\" x 9m",
+    metric: "3/4\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/4\" X 9m A615",
+    technicalDescription: "BC SP 3/4\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BC-1 SP A615 G60 3/4\"X9.0M",
+    group: "NACIONAL",
+    diameterMm: 19.05,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110007550",
+    sapCode: "110007550",
+    label: "1.3/8\" x 9m",
+    metric: "1.3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1.3/8\" X 9m A615",
+    technicalDescription: "BC SP 1.3/8\"x9m NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR SP 1.3/8\"X9000MM",
+    group: "NACIONAL",
+    diameterMm: 34.925,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000267",
+    sapCode: "110000267",
+    label: "5/8\" x 9000mm",
+    metric: "5/8\"",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9000mm A615",
+    technicalDescription: "BC 5/8\"x9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 5/8\"X9000MM A615",
+    group: "FECOXI",
+    diameterMm: 15.875,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000517",
+    sapCode: "110000517",
+    label: "6mm x 9000mm",
+    metric: "6mm",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "6mm X 9000mm A615",
+    technicalDescription: "BC 6mmx9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BC-AL-1 SP NTP341 G60 6MMX9.0M",
+    group: "FECOXI",
+    diameterMm: 6,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000521",
+    sapCode: "110000521",
+    label: "3/8\" x 9000mm",
+    metric: "3/8\"",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9000mm A615",
+    technicalDescription: "BC 3/8\"x9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 3/8\"X9000MM A615",
+    group: "FECOXI",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110007204",
+    sapCode: "110007204",
+    label: "1/2\" x 9000mm",
+    metric: "1/2\"",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9000mm A615",
+    technicalDescription: "BC 1/2\"x9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 1/2\"X9000MM A615",
+    group: "FECOXI",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110007205",
+    sapCode: "110007205",
+    label: "8mm x 9000mm",
+    metric: "8mm",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "8mm X 9000mm A615",
+    technicalDescription: "BC 8mmx9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BARRA CONSTR 8X9M A615",
+    group: "FECOXI",
+    diameterMm: 8,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300623",
+    sapCode: "110300623",
+    label: "12mm x 9000mm",
+    metric: "12mm",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "12mm X 9000mm A615",
+    technicalDescription: "BC 12mmX9000mm NTP 341.031/ASTM A615",
+    materialDescription: "BC 12mmX9000mm NTP 341.031/ASTM A615",
+    group: "FECOXI",
+    diameterMm: 12,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000254",
+    sapCode: "110000254",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9m A615",
+    technicalDescription: "BC FM 3/8\"x9M ASTM A615 G60",
+    materialDescription: "BC FM 3/8\"X9M ASTM A615 G60",
+    group: "FM",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000284",
+    sapCode: "110000284",
+    label: "5/8\" x 9m",
+    metric: "5/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9m A615",
+    technicalDescription: "BC FM 5/8\"x9M ASTM A615 G60",
+    materialDescription: "BC FM 5/8\"X9M ASTM A615 G60",
+    group: "FM",
+    diameterMm: 15.875,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300577",
+    sapCode: "110300577",
+    label: "1/2\" x 9000mm",
+    metric: "1/2\"",
+    length: "9000mm",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9000mm A615",
+    technicalDescription: "BC FM 1/2\"X9000 ASTM A615 G60",
+    materialDescription: "BC FM 1/2\"X9000 ASTM A615 G60",
+    group: "FM",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300947",
+    sapCode: "110300947",
+    label: "12mm x 9m",
+    metric: "12mm",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "12mm X 9m A615",
+    technicalDescription: "BC FM 12MMX9M ASTM A615 G60",
+    materialDescription: "BC FM 12MMX9M ASTM A615 G60",
+    group: "FM",
+    diameterMm: 12,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300948",
+    sapCode: "110300948",
+    label: "1/2\" x 9m",
+    metric: "1/2\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9m A615",
+    technicalDescription: "BC FM 1/2\"X9M ASTM A615 G60",
+    materialDescription: "BC FM 1/2\"X9M ASTM A615 G60",
+    group: "FM",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300521",
+    sapCode: "110300521",
+    label: "12mm x 12m",
+    metric: "12mm",
+    length: "12m",
+    quality: "NB 732",
+    metricDisplay: "12mm X 12m NB 732",
+    technicalDescription: "BC SP EX 12MMX12M NB 732",
+    materialDescription: "BC SP EX 12MMX12M NB 732",
+    group: "EXPORTACIÓN",
+    diameterMm: 12,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110300522",
+    sapCode: "110300522",
+    label: "16mm x 12m",
+    metric: "16mm",
+    length: "12m",
+    quality: "NB 732",
+    metricDisplay: "16mm X 12m NB 732",
+    technicalDescription: "BC SP EX 16MMX12M NB 732",
+    materialDescription: "BC SP EX 16MMX12M NB 732",
+    group: "EXPORTACIÓN",
+    diameterMm: 16,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110300523",
+    sapCode: "110300523",
+    label: "20mm x 12m",
+    metric: "20mm",
+    length: "12m",
+    quality: "NB 732",
+    metricDisplay: "20mm X 12m NB 732",
+    technicalDescription: "BC SP EX 20MMX12M NB 732",
+    materialDescription: "BC SP EX 20MMX12M NB 732",
+    group: "EXPORTACIÓN",
+    diameterMm: 20,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110300524",
+    sapCode: "110300524",
+    label: "9.5mm x 12m",
+    metric: "9.5mm",
+    length: "12m",
+    quality: "NB 732",
+    metricDisplay: "9.5mm X 12m NB 732",
+    technicalDescription: "BC SP EX 9.5MM X12M NB 732",
+    materialDescription: "BC SP EX 9.5MM X12M NB 732",
+    group: "EXPORTACIÓN",
+    diameterMm: 9.5,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110300629",
+    sapCode: "110300629",
+    label: "5/8\" x 9m",
+    metric: "5/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "5/8\" X 9m A615",
+    technicalDescription: "BC GG 5/8\"X9M ASTM A615",
+    materialDescription: "BC GG 5/8\"X9M IMP ASTM A615",
+    group: "EXPORTACIÓN",
+    diameterMm: 15.875,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300630",
+    sapCode: "110300630",
+    label: "1/2\" x 9m",
+    metric: "1/2\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9m A615",
+    technicalDescription: "BC GG 1/2\"X9M ASTM A615",
+    materialDescription: "BC GG 1/2\"X9M IMP ASTM A615",
+    group: "EXPORTACIÓN",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300631",
+    sapCode: "110300631",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9m A615",
+    technicalDescription: "BC GG 3/8\"X9M ASTM A615",
+    materialDescription: "BC GG 3/8\"X9M IMP ASTM A615",
+    group: "EXPORTACIÓN",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000279",
+    sapCode: "110000279",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A706",
+    metricDisplay: "3/8\" X 9m A706",
+    technicalDescription: "BC SP 3/8\"x9m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 3/8\"X9M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110000285",
+    sapCode: "110000285",
+    label: "1/2\" x 12m",
+    metric: "1/2\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "1/2\" X 12m A706",
+    technicalDescription: "BC SP 1/2\"x12m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 1/2\"X12M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 12.7,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110000464",
+    sapCode: "110000464",
+    label: "5/8\" x 12m",
+    metric: "5/8\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "5/8\" X 12m A706",
+    technicalDescription: "BC SP 5/8\"x12m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 5/8\"X12M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 15.875,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110007178",
+    sapCode: "110007178",
+    label: "1.3/8\" x 12m",
+    metric: "1.3/8\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "1.3/8\" X 12m A706",
+    technicalDescription: "BC SP 1.3/8\"x12m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 1.3/8\"X12M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 34.925,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110007179",
+    sapCode: "110007179",
+    label: "3/4\" x 12m",
+    metric: "3/4\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "3/4\" X 12m A706",
+    technicalDescription: "BC SP 3/4\"x12m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 3/4\"X12M",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 19.05,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110007180",
+    sapCode: "110007180",
+    label: "1.3/8\" x 9m",
+    metric: "1.3/8\"",
+    length: "9m",
+    quality: "A706",
+    metricDisplay: "1.3/8\" X 9m A706",
+    technicalDescription: "BC SP 1.3/8\"x9m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 1.3/8\"X9M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 34.925,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110008022",
+    sapCode: "110008022",
+    label: "1\" x 12m",
+    metric: "1\"",
+    length: "12m",
+    quality: "A706",
+    metricDisplay: "1\" X 12m A706",
+    technicalDescription: "BC SP 1\"x12m NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 1\"X12M NTP 339.186",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 25.4,
+    lengthM: 12,
+  },
+  {
+    id: "sap_110300552",
+    sapCode: "110300552",
+    label: "3/4\" x 9m",
+    metric: "3/4\"",
+    length: "9m",
+    quality: "A706",
+    metricDisplay: "3/4\" X 9m A706",
+    technicalDescription: "BC SP 3/4\"X9M NTP 339.186/ASTM A706",
+    materialDescription: "BC-1 SP ASTM A706 3/4\"X9.0",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 19.05,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110300995",
+    sapCode: "110300995",
+    label: "1\" x 9m",
+    metric: "1\"",
+    length: "9m",
+    quality: "A706",
+    metricDisplay: "1\" X 9m A706",
+    technicalDescription: "BC SP 1\"X9M NTP 339.186/ASTM A706",
+    materialDescription: "BC SP 1\"X9M 339.186/ASTM A706",
+    group: "NACIONAL SOLDABLE",
+    diameterMm: 25.4,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110500105",
+    sapCode: "110500105",
+    label: "8mm x 9m",
+    metric: "8mm",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "8mm X 9m A615",
+    technicalDescription: "BC 8mmX9m IMP NTP 341.031/ASTM A615",
+    materialDescription: "BC 8mmX9m IMP NTP 341.031/ASTM A615",
+    group: "SEMI-TERMINADO",
+    diameterMm: 8,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110500106",
+    sapCode: "110500106",
+    label: "3/8\" x 9m",
+    metric: "3/8\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "3/8\" X 9m A615",
+    technicalDescription: "BC 3/8\"X9m IMP NTP 341.031/ASTM A615",
+    materialDescription: "BC 3/8\"X9m IMP NTP 341.031/ASTM A615",
+    group: "SEMI-TERMINADO",
+    diameterMm: 9.525,
+    lengthM: 9,
+  },
+  {
+    id: "sap_110500110",
+    sapCode: "110500110",
+    label: "1/2\" x 9m",
+    metric: "1/2\"",
+    length: "9m",
+    quality: "A615",
+    metricDisplay: "1/2\" X 9m A615",
+    technicalDescription: "BC 1/2\"X9m IMP NTP 341.031/ASTM A615",
+    materialDescription: "BC 1/2\"X9m IMP NTP 341.031/ASTM A615",
+    group: "SEMI-TERMINADO",
+    diameterMm: 12.7,
+    lengthM: 9,
+  },
+] as const;
 
-  // 2) Fhab (Fierro Habilitado)
-  {
-    label: '3/8" FHAB Estribos',
-    technicalDescription: '3/8 FHAB Estribos 15x20',
-    group: 'Fhab',
-    overrideDiameterMm: 9.525,
-    overrideLengthM: 1,
-  },
-  {
-    label: '1/2" FHAB Columna',
-    technicalDescription: 'Media FHAB Columna x 9',
-    group: 'Fhab',
-    overrideDiameterMm: 12.7,
-    overrideLengthM: 9,
-  },
-  {
-    label: '5/8" FHAB Viga',
-    technicalDescription: '5/8 FHAB Viga Armada x 9',
-    group: 'Fhab',
-    overrideDiameterMm: 15.875,
-    overrideLengthM: 9,
-  },
-  {
-    label: '3/4" FHAB Zapata',
-    technicalDescription: '3/4 FHAB Zapata Reforzada',
-    group: 'Fhab',
-    overrideDiameterMm: 19.05,
-    overrideLengthM: 6,
-  },
-
-  // 3) Importado (Barras ASTM A615 Grado 60 Importadas)
-  {
-    label: '3/8" x 12 m',
-    technicalDescription: '3/8 x 12 y A 6 15 IMP',
-    group: 'Importado',
-    overrideDiameterMm: 9.525,
-    overrideLengthM: 12,
-  },
-  {
-    label: '1/2" x 12 m',
-    technicalDescription: 'Media x 12 y A 6 15 IMP',
-    group: 'Importado',
-    overrideDiameterMm: 12.7,
-    overrideLengthM: 12,
-  },
-  {
-    label: '5/8" x 12 m',
-    technicalDescription: '5/8 x 12 y A 6 15 IMP',
-    group: 'Importado',
-    overrideDiameterMm: 15.875,
-    overrideLengthM: 12,
-  },
-  {
-    label: '3/4" x 12 m',
-    technicalDescription: '3/4 x 12 y A 6 15 IMP',
-    group: 'Importado',
-    overrideDiameterMm: 19.05,
-    overrideLengthM: 12,
-  },
-  {
-    label: '1" x 12 m',
-    technicalDescription: '1 x 12 y A 6 15 IMP',
-    group: 'Importado',
-    overrideDiameterMm: 25.4,
-    overrideLengthM: 12,
-  },
-
-  // 4) Recox (Alambrón y Alambre Recocido)
-  {
-    label: '6 mm Alambrón',
-    technicalDescription: 'Alambrón 6 mm RECOX Bobina',
-    group: 'Recox',
-    overrideDiameterMm: 6,
-    overrideLengthM: 0,
-  },
-  {
-    label: '8 mm Alambrón',
-    technicalDescription: 'Alambrón 8 mm RECOX Bobina',
-    group: 'Recox',
-    overrideDiameterMm: 8,
-    overrideLengthM: 0,
-  },
-  {
-    label: 'Alambre #16',
-    technicalDescription: 'Alambre #16 RECOX x 50kg',
-    group: 'Recox',
-    overrideDiameterMm: 1.65,
-    overrideLengthM: 50,
-  },
-  {
-    label: 'Alambre #8',
-    technicalDescription: 'Alambre #8 RECOX x 50kg',
-    group: 'Recox',
-    overrideDiameterMm: 4.19,
-    overrideLengthM: 50,
-  },
-
-  // 5) Dimensionado (Corte y Doblez)
-  {
-    label: '3/8" x 6 m',
-    technicalDescription: '3/8 x 6 m DIM Corte Recto',
-    group: 'Dimensionado',
-    overrideDiameterMm: 9.525,
-    overrideLengthM: 6,
-  },
-  {
-    label: '1/2" x 6 m',
-    technicalDescription: 'Media x 6 m DIM Corte Recto',
-    group: 'Dimensionado',
-    overrideDiameterMm: 12.7,
-    overrideLengthM: 6,
-  },
-  {
-    label: '5/8" x 6 m',
-    technicalDescription: '5/8 x 6 m DIM Doblez Especial',
-    group: 'Dimensionado',
-    overrideDiameterMm: 15.875,
-    overrideLengthM: 6,
-  },
-  {
-    label: '3/4" x 6 m',
-    technicalDescription: '3/4 x 6 m DIM Doblez Especial',
-    group: 'Dimensionado',
-    overrideDiameterMm: 19.05,
-    overrideLengthM: 6,
-  },
-
-  // 6) Especial (Acero Soldable ASTM A706)
-  {
-    label: '1/2" x 9 m Soldable',
-    technicalDescription: 'Media x 9 y A 7 06 Soldable',
-    group: 'Especial',
-    overrideDiameterMm: 12.7,
-    overrideLengthM: 9,
-  },
-  {
-    label: '5/8" x 9 m Soldable',
-    technicalDescription: '5/8 x 9 y A 7 06 Soldable',
-    group: 'Especial',
-    overrideDiameterMm: 15.875,
-    overrideLengthM: 9,
-  },
-  {
-    label: '3/4" x 12 m Soldable',
-    technicalDescription: '3/4 x 12 y A 7 06 Soldable',
-    group: 'Especial',
-    overrideDiameterMm: 19.05,
-    overrideLengthM: 12,
-  },
-  {
-    label: '1" x 12 m Soldable',
-    technicalDescription: '1 x 12 y A 7 06 Soldable',
-    group: 'Especial',
-    overrideDiameterMm: 25.4,
-    overrideLengthM: 12,
-  },
-
-  // 7) Planchas (Laminadas en Caliente LAC / Frío LAF)
-  {
-    label: 'LAC 1.5 mm',
-    technicalDescription: 'LAC 1.5 mm x 1200 x 2400',
-    group: 'Planchas',
-    overrideDiameterMm: 1.5,
-    overrideLengthM: 2.4,
-  },
-  {
-    label: 'LAC 2.0 mm',
-    technicalDescription: 'LAC 2.0 mm x 1200 x 2400',
-    group: 'Planchas',
-    overrideDiameterMm: 2.0,
-    overrideLengthM: 2.4,
-  },
-  {
-    label: 'LAC 3.0 mm',
-    technicalDescription: 'LAC 3.0 mm x 1200 x 2400',
-    group: 'Planchas',
-    overrideDiameterMm: 3.0,
-    overrideLengthM: 2.4,
-  },
-  {
-    label: 'LAF 0.9 mm',
-    technicalDescription: 'LAF 0.9 mm x 1000 x 2000',
-    group: 'Planchas',
-    overrideDiameterMm: 0.9,
-    overrideLengthM: 2.0,
-  },
-
-  // 8) Perfiles (Ángulos, Platinas, Tees A36)
-  {
-    label: 'Ángulo 1 1/2" x 3/16"',
-    technicalDescription: 'Ángulo 1 1/2 x 1 1/2 x 3/16 x 6m',
-    group: 'Perfiles',
-    overrideDiameterMm: 38.1,
-    overrideLengthM: 6,
-  },
-  {
-    label: 'Ángulo 2" x 1/4"',
-    technicalDescription: 'Ángulo 2 x 2 x 1/4 x 6m',
-    group: 'Perfiles',
-    overrideDiameterMm: 50.8,
-    overrideLengthM: 6,
-  },
-  {
-    label: 'Platina 1" x 3/16"',
-    technicalDescription: 'Platina 1 x 3/16 x 6m',
-    group: 'Perfiles',
-    overrideDiameterMm: 25.4,
-    overrideLengthM: 6,
-  },
-  {
-    label: 'Tee 1 1/2" x 1/8"',
-    technicalDescription: 'Tee 1 1/2 x 1 1/2 x 1/8 x 6m',
-    group: 'Perfiles',
-    overrideDiameterMm: 38.1,
-    overrideLengthM: 6,
-  },
-];
 
 /**
  * Parses steel bar dimensions from a label into millimeter diameter and meter length
@@ -360,51 +905,62 @@ export function parseMeasureMetrics(text: string): {
     };
   }
 
-  // Split around 'x' if present: e.g. '3/8" x 9 m' -> left='3/8"', right='9 m'
-  const parts = cleaned.split(/\s*x\s*/i);
-  const diameterPart = parts[0]?.trim() ?? '';
-  const lengthPart = parts[1]?.trim() ?? '';
+  const mmMatch = cleaned.match(/^(\d+(?:[.,]\d+)?)\s*mm\b/i);
+  if (mmMatch) {
+    const diameterMm = parseFloat(mmMatch[1].replace(',', '.'));
+    const lenMatch = cleaned.match(/x\s*(\d+(?:[.,]\d+)?)\s*m\b/i);
+    return {
+      diameterMm,
+      lengthM: lenMatch ? parseFloat(lenMatch[1].replace(',', '.')) : 0,
+      parsed: true,
+    };
+  }
 
-  let diameterMm = Number.MAX_SAFE_INTEGER;
+  const parts = cleaned.split(/\s*x\s*/i);
+  const diameterPart = parts[0]?.trim() || '';
+  const lengthPart = parts[1]?.trim() || '';
+
+  let diameterMm = 12.0;
   let parsed = false;
 
-  // 1) Metric mm: "6 mm", "8mm", "12.5 mm", "12 mm"
-  const mmMatch = diameterPart.match(/^(\d+(?:[.,]\d+)?)\s*mm$/i);
-  if (mmMatch) {
-    diameterMm = parseFloat(mmMatch[1].replace(',', '.'));
+  const mmInside = diameterPart.match(/(\d+(?:[.,]\d+)?)\s*mm/i);
+  if (mmInside) {
+    diameterMm = parseFloat(mmInside[1].replace(',', '.'));
     parsed = true;
   } else {
-    // 2) Mixed fraction inches: '1 3/8"' or '1-3/8'
-    const mixedMatch = diameterPart.match(/^(\d+)\s*[-\s]\s*(\d+)\s*\/\s*(\d+)\s*"?$/);
-    if (mixedMatch) {
-      const whole = parseFloat(mixedMatch[1]);
-      const num = parseFloat(mixedMatch[2]);
-      const den = parseFloat(mixedMatch[3]);
-      if (den > 0) {
-        diameterMm = (whole + num / den) * INCH_TO_MM;
-        parsed = true;
-      }
+    const mixedInchMatch = diameterPart.match(/^(\d+)[-\s]+(\d+)\s*\/\s*(\d+)(?:["'”]|in)?$/);
+    if (mixedInchMatch) {
+      const whole = parseFloat(mixedInchMatch[1]);
+      const num = parseFloat(mixedInchMatch[2]);
+      const den = parseFloat(mixedInchMatch[3]);
+      diameterMm = (whole + num / den) * INCH_TO_MM;
+      parsed = true;
     } else {
-      // 3) Fractional inches: '3/8"', '1/2"', '3/8', '5/8'
-      const fracMatch = diameterPart.match(/^(\d+)\s*\/\s*(\d+)\s*"?$/);
-      if (fracMatch) {
-        const num = parseFloat(fracMatch[1]);
-        const den = parseFloat(fracMatch[2]);
-        if (den > 0) {
-          diameterMm = (num / den) * INCH_TO_MM;
-          parsed = true;
-        }
+      const fracInchMatch = diameterPart.match(/^(\d+)\s*\/\s*(\d+)(?:["'”]|in)?$/);
+      if (fracInchMatch) {
+        const num = parseFloat(fracInchMatch[1]);
+        const den = parseFloat(fracInchMatch[2]);
+        diameterMm = (num / den) * INCH_TO_MM;
+        parsed = true;
       } else {
-        // 4) Whole inches: '1"', '2"', or plain number when length exists like '1 x 9 m'
-        const wholeInchMatch = diameterPart.match(/^(\d+(?:[.,]\d+)?)\s*"$/);
-        if (wholeInchMatch) {
-          diameterMm = parseFloat(wholeInchMatch[1].replace(',', '.')) * INCH_TO_MM;
+        const decimalInchMatch = diameterPart.match(/^(\d+)\.(\d+)\s*\/\s*(\d+)(?:["'”]|in)?$/);
+        if (decimalInchMatch) {
+          const whole = parseFloat(decimalInchMatch[1]);
+          const num = parseFloat(decimalInchMatch[2]);
+          const den = parseFloat(decimalInchMatch[3]);
+          diameterMm = (whole + num / den) * INCH_TO_MM;
           parsed = true;
-        } else if (parts.length > 1) {
-          const plainInchMatch = diameterPart.match(/^(\d+(?:[.,]\d+)?)$/);
-          if (plainInchMatch) {
-            diameterMm = parseFloat(plainInchMatch[1].replace(',', '.')) * INCH_TO_MM;
+        } else {
+          const wholeInchMatch = diameterPart.match(/^(\d+(?:[.,]\d+)?)(?:["'”]|in)\b/);
+          if (wholeInchMatch) {
+            diameterMm = parseFloat(wholeInchMatch[1].replace(',', '.')) * INCH_TO_MM;
             parsed = true;
+          } else if (parts.length > 1) {
+            const plainInchMatch = diameterPart.match(/^(\d+(?:[.,]\d+)?)$/);
+            if (plainInchMatch) {
+              diameterMm = parseFloat(plainInchMatch[1].replace(',', '.')) * INCH_TO_MM;
+              parsed = true;
+            }
           }
         }
       }
@@ -427,48 +983,20 @@ export function parseMeasureMetrics(text: string): {
 }
 
 export function inferClassificationGroup(label: string, techDesc?: string): ClassificationGroup {
-  const combined = `${label} ${techDesc ?? ''}`.toLowerCase();
-  if (combined.includes('fhab')) return 'Fhab';
-  if (combined.includes('imp') || combined.includes('importad')) return 'Importado';
-  if (combined.includes('recox') || combined.includes('alambr') || combined.includes('alambre')) return 'Recox';
-  if (combined.includes('dim') || combined.includes('dimensionad')) return 'Dimensionado';
-  if (combined.includes('soldable') || combined.includes('a706') || combined.includes('a 7 06') || combined.includes('especial')) return 'Especial';
-  if (combined.includes('lac') || combined.includes('laf') || combined.includes('plancha')) return 'Planchas';
-  if (combined.includes('ángulo') || combined.includes('angulo') || combined.includes('platina') || combined.includes('perfil') || combined.includes('tee')) return 'Perfiles';
-  return 'Nacional';
+  const combined = `${label} ${techDesc ?? ''}`.toUpperCase();
+  if (combined.includes('FEHAB') || combined.includes('FHAB') || combined.includes('FH ')) return 'FEHAB';
+  if (combined.includes('FECOXI') || combined.includes('RECOX')) return 'FECOXI';
+  if (combined.includes('EXPORT') || combined.includes('NB 732')) return 'EXPORTACIÓN';
+  if (combined.includes('SOLDABLE') || combined.includes('A706') || combined.includes('339.186')) return 'NACIONAL SOLDABLE';
+  if (combined.includes('SEMI') || combined.includes('SEMI-TERMINADO')) return 'SEMI-TERMINADO';
+  if (combined.includes(' FM ') || combined.startsWith('FM') || combined.includes('BC FM')) return 'FM';
+  if (combined.includes('IMPORT') || combined.includes('IMP') || combined.includes('BC GG')) return 'IMPORTADO';
+  return 'NACIONAL';
 }
 
-export function inferTechnicalDescription(label: string, group: ClassificationGroup = 'Nacional'): string {
+export function inferTechnicalDescription(label: string, _group: ClassificationGroup = 'NACIONAL'): string {
   const cleaned = label.trim();
-  if (/^1\/2/i.test(cleaned)) {
-    const len = cleaned.includes('12') ? '12' : '9';
-    return group === 'Importado'
-      ? `Media x ${len} y A 6 15 IMP`
-      : group === 'Especial'
-        ? `Media x ${len} y A 7 06 Soldable`
-        : `Media x ${len} y A 6 15`;
-  }
-  if (/^3\/8/i.test(cleaned)) {
-    const len = cleaned.includes('12') ? '12' : '9';
-    return group === 'Importado' ? `3/8 x ${len} y A 6 15 IMP` : `3/8 x ${len} y A 6 15`;
-  }
-  if (/^5\/8/i.test(cleaned)) {
-    const len = cleaned.includes('12') ? '12' : '9';
-    return group === 'Importado' ? `5/8 x ${len} y A 6 15 IMP` : `5/8 x ${len} y A 6 15`;
-  }
-  if (/^3\/4/i.test(cleaned)) {
-    const len = cleaned.includes('12') ? '12' : '9';
-    return group === 'Importado' ? `3/4 x ${len} y A 6 15 IMP` : `3/4 x ${len} y A 6 15`;
-  }
-  if (/^1"/i.test(cleaned) || /^1\s*x/i.test(cleaned)) {
-    const len = cleaned.includes('12') ? '12' : '9';
-    return group === 'Importado' ? `1 x ${len} y A 6 15 IMP` : `1 x ${len} y A 6 15`;
-  }
-  if (/^6\s*mm/i.test(cleaned)) return '6 mm x 9 y NTP 341';
-  if (/^8\s*mm/i.test(cleaned)) return '8 mm x 9 y A 6 15';
-  if (/^12\s*mm/i.test(cleaned)) return '12 mm x 9 y A 6 15';
-
-  return `${cleaned} - ${group}`;
+  return `BC ${cleaned} NTP 341.031/ASTM A615`;
 }
 
 export function createMeasureId(label: string, group?: ClassificationGroup): string {
@@ -478,8 +1006,8 @@ export function createMeasureId(label: string, group?: ClassificationGroup): str
     .replace(/"/g, 'in')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
-  if (group && group !== 'Nacional') {
-    return `${group.toLowerCase()}_${cleanLabel}`;
+  if (group && group !== 'NACIONAL') {
+    return `${group.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_${cleanLabel}`;
   }
   return cleanLabel;
 }
@@ -488,7 +1016,13 @@ export function buildMeasureItem(
   label: string,
   options?: {
     isCustom?: boolean;
+    sapCode?: string;
+    metric?: string;
+    length?: string;
+    quality?: string;
+    metricDisplay?: string;
     technicalDescription?: string;
+    materialDescription?: string;
     group?: ClassificationGroup;
     overrideDiameterMm?: number;
     overrideLengthM?: number;
@@ -499,11 +1033,20 @@ export function buildMeasureItem(
   const group = options?.group ?? inferClassificationGroup(normalizedLabel, options?.technicalDescription);
   const technicalDescription =
     options?.technicalDescription?.trim() || inferTechnicalDescription(normalizedLabel, group);
+  const sapCode = options?.sapCode || '';
+  const metricDisplay = options?.metricDisplay || normalizedLabel;
+  const materialDescription = options?.materialDescription || technicalDescription;
 
   return {
-    id: createMeasureId(normalizedLabel, group),
+    id: sapCode ? `sap_${sapCode}` : createMeasureId(normalizedLabel, group),
+    sapCode,
     label: normalizedLabel,
+    metric: options?.metric || normalizedLabel,
+    length: options?.length || (parsed.lengthM ? `${parsed.lengthM}m` : ''),
+    quality: options?.quality || 'A615',
+    metricDisplay,
     technicalDescription,
+    materialDescription,
     group,
     diameterMm: options?.overrideDiameterMm ?? parsed.diameterMm,
     lengthM: options?.overrideLengthM ?? parsed.lengthM,
@@ -553,8 +1096,7 @@ export function normalizeSearchText(text: string): string {
 }
 
 /**
- * Flexible matcher so SAP picking queries like "1/2 x 9", "1/2x9", "12mm", "3/8 12",
- * "Media x 9", "A 6 15", "Nacional", etc., accurately match without false positives.
+ * Flexible matcher so queries by SAP code, measure, group, metric display, or technical description match.
  */
 export function matchesMeasureQuery(targetInput: MeasureItem | string, rawQuery: string): boolean {
   const query = normalizeSearchText(rawQuery);
@@ -563,18 +1105,19 @@ export function matchesMeasureQuery(targetInput: MeasureItem | string, rawQuery:
   const targetLabel = typeof targetInput === 'string' ? targetInput : targetInput.label;
   const targetTech = typeof targetInput === 'string' ? '' : targetInput.technicalDescription;
   const targetGroup = typeof targetInput === 'string' ? '' : targetInput.group;
-  const combined = `${targetLabel} ${targetTech} ${targetGroup}`.trim();
+  const targetSap = typeof targetInput === 'string' ? '' : (targetInput.sapCode ?? '');
+  const targetMaterial = typeof targetInput === 'string' ? '' : (targetInput.materialDescription ?? '');
+  const targetMetricDisplay = typeof targetInput === 'string' ? '' : (targetInput.metricDisplay ?? '');
+  const combined = `${targetLabel} ${targetTech} ${targetGroup} ${targetSap} ${targetMaterial} ${targetMetricDisplay}`.trim();
 
   const target = normalizeSearchText(combined);
   const compactTarget = target.replace(/\s+/g, '');
   const compactQuery = query.replace(/\s+/g, '');
 
-  // Direct substring or spaceless substring match (e.g., "1/2 x 9" -> "1/2x9" inside "1/2x9m")
   if (target.includes(query) || compactTarget.includes(compactQuery)) {
     return true;
   }
 
-  // Token-based match (ignoring standalone 'x')
   const targetTokens = target.split(' ').filter((t) => t !== 'x');
   const queryTokens = query.split(' ').filter((t) => t !== 'x');
   if (queryTokens.length === 0) return true;
@@ -606,24 +1149,15 @@ export function getThicknessTier(diameterMm: number): 1 | 2 | 3 | 4 | 5 | 6 {
 /**
  * Initial full catalog sorted thin-to-thick.
  */
-export const INITIAL_CATALOG: MeasureItem[] = sortCatalogMeasures(
-  SEED_CATALOG_DEFINITIONS.map((seed) =>
-    buildMeasureItem(seed.label, {
-      technicalDescription: seed.technicalDescription,
-      group: seed.group,
-      overrideDiameterMm: seed.overrideDiameterMm,
-      overrideLengthM: seed.overrideLengthM,
-    })
-  )
-);
+export const INITIAL_CATALOG: MeasureItem[] = sortCatalogMeasures([...SEED_CATALOG_DEFINITIONS]);
 
 /**
  * Realistic initial distribution across the 4 warehouses
- * populated with standard measures from the catalog.
+ * populated with standard measures from the official catalog.
  */
 export const INITIAL_WAREHOUSE_STOCK: WarehouseStockMap = {
-  PT_08: ['6_mm', '8_mm', '3_8in_x_9_m', '12_mm', '1_2in_x_9_m'],
-  PT_09: ['importado_3_8in_x_12_m', 'importado_1_2in_x_12_m', '5_8in_x_9_m', 'importado_5_8in_x_12_m'],
-  PT_15_BAHIA: ['fhab_1_2in_fhab_columna', 'fhab_3_8in_fhab_estribos', 'recox_6_mm_alambron', 'recox_alambre_16'],
-  PT_15_CURVA: ['especial_1_2in_x_9_m_soldable', 'especial_3_4in_x_12_m_soldable', 'perfiles_angulo_1_1_2in_x_3_16in'],
+  PT_08: ['sap_110000257', 'sap_110000274', 'sap_110000276', 'sap_110000277'],
+  PT_09: ['sap_110000286', 'sap_110000287', 'sap_110000271', 'sap_110000280'],
+  PT_15_BAHIA: ['sap_110000255', 'sap_110000263', 'sap_110500143', 'sap_110500144'],
+  PT_15_CURVA: ['sap_110000267', 'sap_110000517', 'sap_110000279', 'sap_110300521'],
 };
