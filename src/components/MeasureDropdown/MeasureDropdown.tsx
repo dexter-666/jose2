@@ -186,7 +186,7 @@ export function MeasureDropdown({
                     setActiveIndex(0);
                   }}
                   onKeyDown={handleSearchKeyDown}
-                  placeholder="Buscar descripción técnica (ej: Media x 9 y A 6 15)..."
+                  placeholder="Buscar código o medida (ej: 110000266, 3/8 x 9)..."
                   aria-label="Filtrar medidas en selector"
                   className="w-full rounded-md border border-orange-200 bg-white py-1.5 pl-8 pr-7 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
@@ -285,23 +285,21 @@ export function MeasureDropdown({
                         <div className="flex min-w-0 flex-1 items-center gap-2">
                           <ThicknessIndicator diameterMm={item.diameterMm} highlighted={isSelected} />
                           <div className="min-w-0 flex-1">
-                            {/* Métrica X Longitud Calidad (Segunda vista despachador) */}
-                            <div className="truncate font-mono text-[13px] font-black text-slate-900">
-                              {item.metricDisplay || item.label}
-                            </div>
-                            {/* Descripción técnica completa */}
-                            <div className="truncate text-[11px] font-medium text-slate-600">
-                              {item.technicalDescription}
-                            </div>
-                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
-                              <span className="rounded bg-orange-100/90 px-1 font-bold text-orange-900">
-                                {item.group}
-                              </span>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              {/* 1. Código primero */}
                               {item.sapCode && (
-                                <span className="font-mono text-slate-600">
+                                <span className="font-mono text-[13px] font-black text-orange-950">
                                   CÓDIGO: {item.sapCode}
                                 </span>
                               )}
+                              {/* 2. Medida luego */}
+                              <span className="font-mono text-[13px] font-black text-slate-900">
+                                {item.metricDisplay || item.label}
+                              </span>
+                              {/* 3. Clasificación al costado o abajito con un poco menos de tamaño */}
+                              <span className="rounded bg-orange-100/90 px-1.5 py-0.5 text-[10px] font-extrabold uppercase text-orange-900">
+                                {item.group}
+                              </span>
                               {item.isCustom && (
                                 <span className="rounded bg-orange-100 px-1 text-[9px] font-bold text-orange-800">
                                   Custom
