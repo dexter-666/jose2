@@ -60,31 +60,60 @@ export function AppHeader() {
                       aria-hidden="true"
                     />
 
-                    {/* Alternador de Vistas */}
-                    <div className="inline-flex shrink-0 items-center rounded-full bg-slate-200/60 p-0.5 shadow-inner backdrop-blur-sm sm:p-1">
+                    {/* Alternador de Vistas tipo Switch Animado (Encendido / Apagado con Liquid Glass) */}
+                    <div
+                      role="group"
+                      aria-label="Selector de rol"
+                      className="relative inline-flex shrink-0 items-center rounded-full border border-white/60 bg-slate-900/10 p-1 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),inset_0_-1px_1px_rgba(255,255,255,0.7)] backdrop-blur-md"
+                    >
+                      {/* Pastilla deslizante (Thumb del Switch animado) */}
+                      <div
+                        aria-hidden="true"
+                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-transform duration-300 ease-[cubic-bezier(0.34,1.45,0.7,1)] ${
+                          isDispatcher
+                            ? 'left-1 translate-x-0 bg-gradient-to-r from-orange-600 to-orange-500 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.85),0_3px_10px_rgba(234,88,12,0.45)]'
+                            : 'left-1 translate-x-full bg-gradient-to-r from-orange-600 to-amber-500 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.85),0_3px_10px_rgba(249,115,22,0.45)]'
+                        }`}
+                      >
+                        {/* Reflejo especular superior tipo Liquid Glass */}
+                        <div className="absolute inset-x-2 top-0.5 h-[1.5px] rounded-full bg-white/70" />
+                      </div>
+
                       <Link
                         to="/despachador"
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 sm:px-3.5 sm:text-sm ${
+                        className={`relative z-10 inline-flex min-w-[110px] items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold select-none transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 sm:min-w-[130px] sm:px-3.5 sm:text-sm ${
                           isDispatcher
-                            ? 'liquid-glass-active text-white'
-                            : 'text-slate-700 hover:text-orange-800'
+                            ? 'text-white drop-shadow-xs'
+                            : 'text-slate-700 hover:text-slate-950'
                         }`}
                         aria-current={isDispatcher ? 'page' : undefined}
                       >
                         <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>Despachador</span>
+                        {isDispatcher && (
+                          <span
+                            aria-hidden="true"
+                            className="h-1.5 w-1.5 animate-pulse rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]"
+                          />
+                        )}
                       </Link>
                       <Link
                         to="/balanza"
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:px-3.5 sm:text-sm ${
+                        className={`relative z-10 inline-flex min-w-[110px] items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold select-none transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:min-w-[130px] sm:px-3.5 sm:text-sm ${
                           isScale
-                            ? 'liquid-glass-active text-white'
-                            : 'text-slate-700 hover:text-orange-800'
+                            ? 'text-white drop-shadow-xs'
+                            : 'text-slate-700 hover:text-slate-950'
                         }`}
                         aria-current={isScale ? 'page' : undefined}
                       >
                         <Monitor className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>Balanza</span>
+                        {isScale && (
+                          <span
+                            aria-hidden="true"
+                            className="h-1.5 w-1.5 animate-pulse rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]"
+                          />
+                        )}
                       </Link>
                     </div>
 
