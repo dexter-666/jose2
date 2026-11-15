@@ -49,7 +49,7 @@ export function AppHeader() {
                   className="liquid-glass-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-slate-700 transition-all hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:px-3.5 sm:text-sm"
                 >
                   <ArrowLeft className="h-3.5 w-3.5 text-orange-600" aria-hidden="true" />
-                  <span>Volver al Inicio</span>
+                  <span>Volver al inicio</span>
                 </Link>
 
                 {isAuthenticated && (

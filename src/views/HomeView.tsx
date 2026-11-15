@@ -33,7 +33,7 @@ export function HomeView() {
                 </div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-gerdau-soft px-3 py-1 text-xs font-bold text-gerdau">
                   <Warehouse className="h-3.5 w-3.5" aria-hidden="true" />
-                  Panel Editable
+                  Panel editable
                 </span>
               </div>
 
@@ -46,7 +46,7 @@ export function HomeView() {
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
-              <span className="text-sm font-bold text-gerdau">Abrir Editable Almacén</span>
+              <span className="text-sm font-bold text-gerdau">Abrir editable almacén</span>
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gerdau-soft text-gerdau transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-gerdau group-hover:text-white">
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </span>
@@ -67,7 +67,7 @@ export function HomeView() {
                 </div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F2FC] px-3 py-1 text-xs font-bold text-[#0056A3]">
                   <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                  Solo Lectura
+                  Solo lectura
                 </span>
               </div>
 
@@ -80,7 +80,7 @@ export function HomeView() {
             </div>
 
             <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
-              <span className="text-sm font-bold text-[#0056A3]">Abrir Monitor Balanza</span>
+              <span className="text-sm font-bold text-[#0056A3]">Abrir monitor balanza</span>
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E6F2FC] text-[#0056A3] transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-[#0284C7] group-hover:text-white">
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </span>
