@@ -125,11 +125,7 @@ describe('Stock por Balanza application', () => {
     // Cada columna muestra el almacén (PT 08, etc.) y código
     expect(screen.getAllByText('PT 08').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/código:? 110000257/i).length).toBeGreaterThan(0);
-
-    // Buscador
-    const searchInput = screen.getByPlaceholderText(/^buscar medida\.\.\.$/i);
-    fireEvent.change(searchInput, { target: { value: '12mm' } });
-    expect(screen.getByText(/disponible en:/i)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/^buscar medida\.\.\.$/i)).not.toBeInTheDocument();
   });
 
   it('supports adding custom measures with category and technical description', () => {

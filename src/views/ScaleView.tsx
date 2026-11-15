@@ -1,59 +1,13 @@
-import { useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Filter, Lock, Search, X } from 'lucide-react';
+import { CheckCircle2, Clock, Lock, X } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
 import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
-import { matchesMeasureQuery, WAREHOUSES } from '../utils/measures';
+import { WAREHOUSES } from '../utils/measures';
 import { formatTime12h } from '../utils/shifts';
 
 export function ScaleView() {
   const { state, catalogMap, isConnected, recentPulse, dismissPulse } = useStock();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [hideNonMatchingColumns, setHideNonMatchingColumns] = useState(false);
-
-  const hasQuery = searchQuery.trim().length > 0;
-
-  const warehouseMatchSummary = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        allMeasures: MeasureItem[];
-        matchingIds: Set<string>;
-      }
-    >();
-
-    for (const wh of WAREHOUSES) {
-      const rawMeasures = state.warehouses[wh.id]
-        .map((id) => catalogMap.get(id))
-        .filter((item): item is MeasureItem => Boolean(item));
-
-      const matchingIds = new Set(
-        hasQuery
-          ? rawMeasures
-              .filter((m) => matchesMeasureQuery(m, searchQuery))
-              .map((m) => m.id)
-          : []
-      );
-
-      map.set(wh.id, { allMeasures: rawMeasures, matchingIds });
-    }
-    return map;
-  }, [state.warehouses, catalogMap, hasQuery, searchQuery]);
-
-  const matchingWarehouseLabels = useMemo(() => {
-    if (!hasQuery) return [];
-    return WAREHOUSES.filter(
-      (wh) => (warehouseMatchSummary.get(wh.id)?.matchingIds.size ?? 0) > 0
-    ).map((wh) => wh.label);
-  }, [hasQuery, warehouseMatchSummary]);
-
-  const visibleWarehouses = useMemo(() => {
-    if (!hasQuery || !hideNonMatchingColumns) return WAREHOUSES;
-    return WAREHOUSES.filter(
-      (wh) => (warehouseMatchSummary.get(wh.id)?.matchingIds.size ?? 0) > 0
-    );
-  }, [hasQuery, hideNonMatchingColumns, warehouseMatchSummary]);
 
   return (
     <main className="flex-1 bg-gradient-to-b from-[#FFF9F2] to-[#FFF1E0]">
@@ -63,58 +17,25 @@ export function ScaleView() {
           aria-label="Monitor de balanza en tiempo real"
           className="liquid-glass-card mb-6 p-4 shadow-md sm:p-6"
         >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/90 bg-orange-100/80 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-950 uppercase shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-sm">
-                  <Lock className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
-                  Solo Lectura · Monitor Balanza
-                </span>
-                <ConnectionDot connected={isConnected} />
-              </div>
-
-              <h1 className="sr-only">Monitor de Balanza</h1>
-              <p className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
-                <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
-                <span>
-                  Última modificación:{' '}
-                  <strong className="font-mono text-sm font-extrabold text-orange-800 sm:text-base">
-                    {formatTime12h(state.lastVerifiedAt)}
-                  </strong>
-                </span>
-              </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/90 bg-orange-100/80 px-3.5 py-1 text-xs font-extrabold tracking-wide text-orange-950 uppercase shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-sm">
+                <Lock className="h-3.5 w-3.5 text-orange-700" aria-hidden="true" />
+                Solo Lectura · Monitor Balanza
+              </span>
+              <ConnectionDot connected={isConnected} />
             </div>
 
-            {/* Buscador Rápido con Liquid Glass */}
-            <div className="w-full lg:max-w-md">
-              <label htmlFor="balanza-search" className="sr-only">
-                Buscar medida
-              </label>
-              <div className="relative flex items-center">
-                <Search
-                  className="pointer-events-none absolute left-3.5 h-5 w-5 text-orange-600"
-                  aria-hidden="true"
-                />
-                <input
-                  id="balanza-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar medida..."
-                  className="w-full rounded-xl border border-white/90 bg-white/75 py-2.5 pl-11 pr-10 font-mono text-sm font-semibold text-slate-900 placeholder:font-sans placeholder:font-medium placeholder:text-slate-400 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] backdrop-blur-md focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-400/25 transition-all"
-                />
-                {hasQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    aria-label="Limpiar búsqueda"
-                    className="absolute right-2.5 rounded-lg p-1 text-slate-400 transition-colors hover:bg-orange-100 hover:text-orange-900"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
+            <h1 className="sr-only">Monitor de Balanza</h1>
+            <p className="flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
+              <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
+              <span>
+                Última modificación:{' '}
+                <strong className="font-mono text-sm font-extrabold text-orange-800 sm:text-base">
+                  {formatTime12h(state.lastVerifiedAt)}
+                </strong>
+              </span>
+            </p>
           </div>
 
           {/* Notificación en tiempo real cuando Despachador confirma un cambio */}
@@ -153,192 +74,113 @@ export function ScaleView() {
               </button>
             </div>
           )}
-
-          {/* Banner de Resultado de Búsqueda */}
-          {hasQuery && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-300 bg-orange-100/70 px-4 py-3">
-              <div className="text-xs sm:text-sm">
-                {matchingWarehouseLabels.length > 0 ? (
-                  <span className="font-semibold text-slate-800">
-                    Medida{' '}
-                    <code className="font-mono font-bold text-orange-900">&ldquo;{searchQuery}&rdquo;</code>{' '}
-                    disponible en:{' '}
-                    <span className="font-extrabold text-orange-700">
-                      {matchingWarehouseLabels.join('  ·  ')}
-                    </span>
-                  </span>
-                ) : (
-                  <span className="font-semibold text-orange-800">
-                    No se encontraron almacenes con medidas para &ldquo;{searchQuery}&rdquo;.
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setHideNonMatchingColumns((v) => !v)}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
-                  hideNonMatchingColumns
-                    ? 'border-orange-600 bg-orange-600 text-white'
-                    : 'border-orange-300 bg-white text-orange-900 hover:border-orange-500'
-                }`}
-              >
-                <Filter className="h-3.5 w-3.5" aria-hidden="true" />
-                {hideNonMatchingColumns ? 'Mostrar los 4 almacenes' : 'Solo coincidencias'}
-              </button>
-            </div>
-          )}
         </section>
 
         {/* Tablero de 4 Columnas Fijas (Solo Lectura con Código y Texto Completo de Medidas) */}
         <section
           aria-label="Columnas de stock por almacén"
-          className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
+          className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
         >
-          {visibleWarehouses.length === 0 ? (
-            <div className="col-span-full rounded-2xl border border-dashed border-orange-300 bg-white p-10 text-center">
-              <p className="text-base font-bold text-slate-800">
-                Ningún almacén coincide con &ldquo;{searchQuery}&rdquo;
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setHideNonMatchingColumns(false);
-                }}
-                className="mt-3 rounded-lg bg-orange-600 px-4 py-2 text-xs font-bold text-white hover:bg-orange-700"
-              >
-                Ver todos los almacenes
-              </button>
-            </div>
-          ) : (
-            visibleWarehouses.map((wh) => {
-              const info = warehouseMatchSummary.get(wh.id)!;
-              const matchCount = info.matchingIds.size;
-              const isHighlightedColumn = hasQuery && matchCount > 0;
-              const isDimmedColumn = hasQuery && matchCount === 0;
-              const isPulsingColumn = recentPulse?.affectedWarehouses?.includes(wh.id) ?? false;
-              const isDarkOrange = wh.accent === 'blue';
+          {WAREHOUSES.map((wh) => {
+            const measures = state.warehouses[wh.id]
+              .map((id) => catalogMap.get(id))
+              .filter((item): item is MeasureItem => Boolean(item));
+            const isPulsingColumn = recentPulse?.affectedWarehouses?.includes(wh.id) ?? false;
+            const isDarkOrange = wh.accent === 'blue';
 
-              return (
-                <article
-                  key={`${wh.id}-${isPulsingColumn ? recentPulse?.pulseKey : 'idle'}`}
-                  className={`flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
-                    isHighlightedColumn
-                      ? 'border-2 border-orange-500 shadow-lg ring-4 ring-orange-400/25'
-                      : isDimmedColumn
-                        ? 'border-orange-200 opacity-45'
-                        : isPulsingColumn
-                          ? 'animate-stock-pulse border-orange-400 shadow-md'
-                          : 'border-orange-200 shadow-sm'
+            return (
+              <article
+                key={`${wh.id}-${isPulsingColumn ? recentPulse?.pulseKey : 'idle'}`}
+                className={`flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
+                  isPulsingColumn
+                    ? 'animate-stock-pulse border-orange-400 shadow-md'
+                    : 'border-orange-200 shadow-sm'
+                }`}
+              >
+                {/* Cabecera fija del almacén con código en naranja / naranja oscuro */}
+                <header
+                  className={`flex items-center justify-between px-4 py-3.5 text-white ${
+                    isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
                   }`}
                 >
-                  {/* Cabecera fija del almacén con código en naranja / naranja oscuro */}
-                  <header
-                    className={`flex items-center justify-between px-4 py-3.5 text-white ${
-                      isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-extrabold tracking-wide">{wh.label}</h2>
-                    </div>
-                    {isHighlightedColumn ? (
-                      <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-extrabold text-orange-950">
-                        {matchCount} {matchCount === 1 ? 'coincidencia' : 'coincidencias'}
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
-                        {info.allMeasures.length}
-                      </span>
-                    )}
-                  </header>
-
-                  {/* Subtítulo de columna */}
-                  <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2">
-                    <h3 className="text-xs font-bold tracking-wide text-orange-950 uppercase">
-                      Tipos de medida
-                    </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md bg-white/20 px-2 py-0.5 text-xs font-black tracking-wider uppercase">
+                      {wh.label}
+                    </span>
+                    <h2 className="text-base font-black tracking-tight">{wh.label}</h2>
                   </div>
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
+                    {measures.length}
+                  </span>
+                </header>
 
-                  {/* Tarjetas estáticas de solo lectura: DATOS OBLIGATORIOS (Código + Texto Completo) */}
-                  <div className="flex-1 p-4">
-                    {info.allMeasures.length === 0 ? (
-                      <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
-                        Sin medidas asignadas
-                      </div>
-                    ) : (
-                      <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>
-                        {info.allMeasures.map((measure) => {
-                          const isMatch = hasQuery && info.matchingIds.has(measure.id);
-                          const affectedMeasureIds = recentPulse?.affectedMeasureIds ?? [];
-                          const isPulsingItem =
-                            isPulsingColumn &&
-                            (affectedMeasureIds.length === 0 ||
-                              affectedMeasureIds.includes(measure.id));
+                {/* Subtítulo de columna */}
+                <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2">
+                  <h3 className="text-xs font-bold tracking-wide text-orange-950 uppercase">
+                    Tipos de medida
+                  </h3>
+                </div>
 
-                          return (
-                            <li
-                              key={`${measure.id}-${isPulsingItem ? recentPulse?.pulseKey : 'idle'}`}
-                              className={`flex flex-col gap-1.5 rounded-xl border p-3 transition-all ${
-                                isMatch
-                                  ? 'border-orange-500 bg-orange-100 shadow-sm ring-2 ring-orange-400/50'
-                                  : isPulsingItem
-                                    ? 'animate-stock-pulse border-orange-400 bg-white'
-                                    : hasQuery
-                                      ? 'border-orange-100 bg-orange-50/30 opacity-60'
-                                      : 'border-orange-200/80 bg-orange-50/50'
-                              }`}
-                            >
-                              {/* Fila Superior: 1. CÓDIGO primero (negrita, mediano), 2. Clasificación */}
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {/* CÓDIGO PRIMERO (Negrita, tamaño mediano) */}
-                                  {measure.sapCode && (
-                                    <span className="rounded-md bg-white px-2.5 py-1 font-mono text-sm sm:text-base font-black text-slate-900 shadow-2xs border border-orange-200">
-                                      CÓDIGO: {measure.sapCode}
-                                    </span>
-                                  )}
-                                  {/* CLASIFICACIÓN */}
-                                  <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900 border border-orange-200/80">
-                                    {measure.group}
-                                  </span>
-                                </div>
+                {/* Tarjetas estáticas de solo lectura: DATOS OBLIGATORIOS (Código + Texto Completo) */}
+                <div className="flex-1 p-4">
+                  {measures.length === 0 ? (
+                    <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
+                      Sin medidas asignadas
+                    </div>
+                  ) : (
+                    <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>
+                      {measures.map((measure) => {
+                        const affectedMeasureIds = recentPulse?.affectedMeasureIds ?? [];
+                        const isPulsingItem =
+                          isPulsingColumn &&
+                          (affectedMeasureIds.length === 0 ||
+                            affectedMeasureIds.includes(measure.id));
 
-                                {isMatch && (
-                                  <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase">
-                                    Coincide
+                        return (
+                          <li
+                            key={`${measure.id}-${isPulsingItem ? recentPulse?.pulseKey : 'idle'}`}
+                            className={`flex flex-col gap-1.5 rounded-xl border p-3 transition-all ${
+                              isPulsingItem
+                                ? 'animate-stock-pulse border-orange-400 bg-white'
+                                : 'border-orange-200/80 bg-orange-50/50'
+                            }`}
+                          >
+                            {/* Fila Superior: 1. CÓDIGO primero (negrita, mediano), 2. Clasificación */}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {/* CÓDIGO PRIMERO (Negrita, tamaño mediano) */}
+                                {measure.sapCode && (
+                                  <span className="rounded-md bg-white px-2.5 py-1 font-mono text-sm sm:text-base font-black text-slate-900 shadow-2xs border border-orange-200">
+                                    CÓDIGO: {measure.sapCode}
                                   </span>
                                 )}
+                                {/* CLASIFICACIÓN */}
+                                <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900 border border-orange-200/80">
+                                  {measure.group}
+                                </span>
                               </div>
+                            </div>
 
-                              {/* Fila Principal: DESCRIPCIÓN TÉCNICA OFICIAL SAP */}
-                              <div className="flex items-start gap-2.5 pt-1">
-                                <div className="pt-1">
-                                  <ThicknessIndicator
-                                    diameterMm={measure.diameterMm}
-                                    highlighted={isMatch}
-                                  />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div
-                                    className={`font-mono text-sm font-bold tracking-tight leading-snug sm:text-base ${
-                                      isMatch ? 'text-orange-900 font-extrabold' : 'text-slate-900'
-                                    }`}
-                                  >
-                                    {measure.technicalDescription}
-                                  </div>
-                                </div>
+                            {/* Fila Principal: DESCRIPCIÓN TÉCNICA OFICIAL SAP */}
+                            <div className="flex items-start gap-2.5 pt-1">
+                              <div className="pt-1">
+                                <ThicknessIndicator
+                                  diameterMm={measure.diameterMm}
+                                />
                               </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </div>
-                </article>
-              );
-            })
-          )}
+                              <p className="font-mono text-xs sm:text-sm font-bold leading-snug tracking-tight text-slate-900">
+                                {measure.technicalDescription}
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </section>
       </div>
     </main>
