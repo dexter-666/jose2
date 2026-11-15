@@ -280,20 +280,20 @@ export function MeasureDropdown({
                           <ThicknessIndicator diameterMm={item.diameterMm} highlighted={isSelected} />
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                              {/* 1. Código primero */}
-                              {item.sapCode && (
-                                <span className="font-mono text-[13px] font-black text-orange-950">
-                                  CÓDIGO: {item.sapCode}
-                                </span>
-                              )}
-                              {/* 2. Medida luego */}
-                              <span className="font-mono text-[13px] font-black text-slate-900">
+                              {/* 1. Medida (espesor y diámetro + calidad) principal */}
+                              <span className="font-mono text-sm font-black text-slate-900">
                                 {item.metricDisplay || item.label}
                               </span>
-                              {/* 3. Clasificación al costado o abajito con un poco menos de tamaño */}
+                              {/* 2. Clasificación */}
                               <span className="rounded bg-orange-100/90 px-1.5 py-0.5 text-[10px] font-extrabold uppercase text-orange-900">
                                 {item.group}
                               </span>
+                              {/* 3. Código secundario en menor tamaño */}
+                              {item.sapCode && (
+                                <span className="font-mono text-[11px] font-semibold text-slate-500">
+                                  CÓDIGO: {item.sapCode}
+                                </span>
+                              )}
                               {item.isCustom && (
                                 <span className="rounded bg-orange-100 px-1 text-[9px] font-bold text-orange-800">
                                   Custom

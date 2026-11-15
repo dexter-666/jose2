@@ -336,16 +336,21 @@ export function DispatcherView() {
                             className="flex flex-col gap-1.5 rounded-xl border border-orange-200/90 bg-orange-50/40 p-2.5 shadow-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              {/* 1. Código primero, 2. Clasificación luego (Agrandados) */}
-                              <div className="flex flex-wrap items-center gap-2">
-                                {measure?.sapCode && (
-                                  <span className="rounded-md bg-white px-2.5 py-1 font-mono text-xs sm:text-sm font-black text-slate-800 shadow-2xs border border-orange-200">
-                                    CÓDIGO: {measure.sapCode}
+                              {/* Despachador: Clasificación y Calidad, con código secundario en menor tamaño */}
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                {measure && (
+                                  <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs sm:text-sm font-black uppercase text-orange-900 border border-orange-200/80">
+                                    {measure.group}
                                   </span>
                                 )}
-                                {measure && (
-                                  <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs sm:text-sm font-extrabold uppercase text-orange-900 border border-orange-200/70">
-                                    {measure.group}
+                                {measure?.quality && (
+                                  <span className="rounded-md bg-white px-2 py-0.5 text-xs font-bold text-orange-900 shadow-2xs border border-orange-200">
+                                    {measure.quality}
+                                  </span>
+                                )}
+                                {measure?.sapCode && (
+                                  <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-semibold text-slate-500 border border-slate-200 shadow-2xs">
+                                    CÓDIGO: {measure.sapCode}
                                   </span>
                                 )}
                               </div>

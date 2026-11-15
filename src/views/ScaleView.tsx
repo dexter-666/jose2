@@ -360,17 +360,17 @@ export function ScaleView() {
                                       : 'border-orange-200/80 bg-orange-50/50'
                               }`}
                             >
-                              {/* Fila Superior: Código de Producto + Clasificación + Código SAP */}
+                              {/* Fila Superior: 1. CÓDIGO primero (negrita, mediano), 2. Clasificación */}
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  {/* CÓDIGO PRIMERO */}
+                                  {/* CÓDIGO PRIMERO (Negrita, tamaño mediano) */}
                                   {measure.sapCode && (
-                                    <span className="rounded-md bg-white px-2 py-0.5 font-mono text-xs sm:text-[13px] font-black text-slate-800 shadow-2xs border border-orange-200">
+                                    <span className="rounded-md bg-white px-2.5 py-1 font-mono text-sm sm:text-base font-black text-slate-900 shadow-2xs border border-orange-200">
                                       CÓDIGO: {measure.sapCode}
                                     </span>
                                   )}
-                                  {/* CLASIFICACIÓN LUEGO */}
-                                  <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs sm:text-[13px] font-extrabold uppercase text-orange-900 border border-orange-200/80">
+                                  {/* CLASIFICACIÓN */}
+                                  <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900 border border-orange-200/80">
                                     {measure.group}
                                   </span>
                                 </div>
@@ -382,8 +382,8 @@ export function ScaleView() {
                                 )}
                               </div>
 
-                              {/* Fila Principal: MATERIAL / TEXTO COMPLETO DE MEDIDAS Y MÉTRICAS */}
-                              <div className="flex items-start gap-2.5 pt-0.5">
+                              {/* Fila Principal: DESCRIPCIÓN TÉCNICA OFICIAL SAP */}
+                              <div className="flex items-start gap-2.5 pt-1">
                                 <div className="pt-1">
                                   <ThicknessIndicator
                                     diameterMm={measure.diameterMm}
@@ -391,26 +391,12 @@ export function ScaleView() {
                                   />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  {/* Material / Descripción técnica para Balanza */}
                                   <div
-                                    className={`font-mono text-sm font-extrabold tracking-tight sm:text-base ${
-                                      isMatch ? 'text-orange-900' : 'text-slate-900'
+                                    className={`font-mono text-sm font-bold tracking-tight leading-snug sm:text-base ${
+                                      isMatch ? 'text-orange-900 font-extrabold' : 'text-slate-900'
                                     }`}
                                   >
-                                    {measure.materialDescription || measure.technicalDescription}
-                                  </div>
-
-                                  {/* Métrica desplegada y detalles técnicos */}
-                                  <div className="mt-0.5 flex flex-wrap items-center gap-1.5 font-mono text-xs font-semibold text-slate-600">
-                                    <span className="text-orange-800 font-bold">{measure.metricDisplay || measure.label}</span>
-                                    <span>·</span>
-                                    <span>Ø {measure.diameterMm.toFixed(2)} mm</span>
-                                    {measure.lengthM > 0 && (
-                                      <>
-                                        <span>·</span>
-                                        <span>{measure.lengthM} m</span>
-                                      </>
-                                    )}
+                                    {measure.technicalDescription}
                                   </div>
                                 </div>
                               </div>
