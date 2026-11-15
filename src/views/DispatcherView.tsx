@@ -3,8 +3,6 @@ import {
   CheckCircle2,
   Clock,
   Edit3,
-  Filter,
-  Layers,
   Plus,
   RotateCcw,
   Ruler,
@@ -17,7 +15,6 @@ import { useStock } from '../context/StockContext';
 import { ClassificationGroup, MeasureItem, WarehouseId, WarehouseStockMap } from '../types/stock';
 import {
   buildMeasureItem,
-  CLASSIFICATION_GROUPS,
   sortCatalogMeasures,
   sortMeasureIdsByCatalog,
   WAREHOUSES,
@@ -34,9 +31,6 @@ export function DispatcherView() {
 
   // Reloj en tiempo real para "Hora de modificación"
   const [liveNow, setLiveNow] = useState<Date>(() => new Date());
-
-  // 8 Grupos de Clasificación requeridos por especificación
-  const [selectedGroup, setSelectedGroup] = useState<ClassificationGroup | 'ALL'>('ALL');
 
   const [pendingSlotWarehouse, setPendingSlotWarehouse] = useState<WarehouseId | null>(null);
   const [customModalWarehouse, setCustomModalWarehouse] = useState<WarehouseId | null>(null);
@@ -85,15 +79,6 @@ export function DispatcherView() {
     () => new Map<string, MeasureItem>(draftCatalog.map((m) => [m.id, m])),
     [draftCatalog]
   );
-
-  // Conteo de medidas por cada uno de los 8 grupos en el catálogo
-  const groupCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const g of CLASSIFICATION_GROUPS) {
-      counts[g] = draftCatalog.filter((m) => m.group === g).length;
-    }
-    return counts;
-  }, [draftCatalog]);
 
   const handleAddMeasure = (warehouseId: WarehouseId, measureId: string) => {
     setDraftWarehouses((prev) => ({
@@ -148,7 +133,7 @@ export function DispatcherView() {
 
     const newMeasure = buildMeasureItem(trimmed, {
       isCustom: true,
-      group: options?.group ?? (selectedGroup !== 'ALL' ? selectedGroup : 'NACIONAL'),
+      group: options?.group ?? 'NACIONAL',
       technicalDescription: options?.technicalDescription,
       overrideDiameterMm: options?.overrideDiameterMm,
       overrideLengthM: options?.overrideLengthM,
@@ -287,93 +272,6 @@ export function DispatcherView() {
           )}
         </section>
 
-        {/* 8 Grupos de Clasificación (Requerimiento Técnico 2: Carga Inicial y Desglose Dinámico) */}
-        <section
-          aria-label="Grupos de clasificación"
-          className="mt-6 rounded-2xl border border-orange-200 bg-white p-4 shadow-sm"
-        >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-orange-600" aria-hidden="true" />
-              <h2 className="text-xs font-black tracking-wider text-slate-800 uppercase sm:text-sm">
-                8 Grupos de Clasificación (Filtrado Dinámico)
-              </h2>
-            </div>
-            {selectedGroup !== 'ALL' && (
-              <button
-                type="button"
-                onClick={() => setSelectedGroup('ALL')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-orange-700 hover:text-orange-900 hover:underline"
-              >
-                <span>Mostrar todos los grupos</span>
-              </button>
-            )}
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
-            {/* Botón Todos */}
-            <button
-              type="button"
-              onClick={() => setSelectedGroup('ALL')}
-              className={`flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all ${
-                selectedGroup === 'ALL'
-                  ? 'border-orange-600 bg-orange-600 text-white shadow-md'
-                  : 'border-orange-200 bg-orange-50/50 text-slate-700 hover:border-orange-400 hover:bg-orange-100/70'
-              }`}
-            >
-              <span className="text-xs font-black">TODOS</span>
-              <span className={`text-[10px] font-bold ${selectedGroup === 'ALL' ? 'text-orange-100' : 'text-slate-500'}`}>
-                {draftCatalog.length} medidas
-              </span>
-            </button>
-
-            {/* Los 8 Grupos requeridos por la especificación */}
-            {CLASSIFICATION_GROUPS.map((group) => {
-              const isSelected = selectedGroup === group;
-              const count = groupCounts[group] ?? 0;
-
-              return (
-                <button
-                  key={group}
-                  type="button"
-                  onClick={() => setSelectedGroup(group)}
-                  className={`flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all ${
-                    isSelected
-                      ? 'border-orange-600 bg-orange-600 text-white shadow-md ring-2 ring-orange-500/30'
-                      : 'border-orange-200 bg-orange-50/50 text-slate-800 hover:border-orange-400 hover:bg-orange-100/70'
-                  }`}
-                >
-                  <span className="truncate text-xs font-black tracking-tight">{group}</span>
-                  <span
-                    className={`text-[10px] font-bold ${
-                      isSelected ? 'text-orange-100' : 'text-slate-500'
-                    }`}
-                  >
-                    {count} {count === 1 ? 'medida' : 'medidas'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {selectedGroup !== 'ALL' && (
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-orange-100/80 px-3.5 py-2 text-xs font-bold text-orange-950">
-              <span className="flex items-center gap-1.5">
-                <Filter className="h-3.5 w-3.5 text-orange-700" />
-                Filtrando por grupo: <strong className="font-black underline">{selectedGroup}</strong>.
-                Mostrando descripciones técnicas completas para este grupo.
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedGroup('ALL')}
-                className="rounded bg-orange-200 px-2 py-0.5 text-[11px] font-extrabold text-orange-900 hover:bg-orange-300"
-              >
-                Quitar filtro
-              </button>
-            </div>
-          )}
-        </section>
-
         {/* Tablero de 4 Columnas Fijas (Códigos PT08, PT09, PT 15 - BAHIA, PT 15 - CURVA) */}
         <section
           aria-label="Tablero editable de almacenes"
@@ -381,15 +279,7 @@ export function DispatcherView() {
         >
           {WAREHOUSES.map((wh) => {
             const rawAssignedIds = draftWarehouses[wh.id];
-            // Filtrado dinámico según grupo seleccionado (Requerimiento Técnico 2)
-            const displayedIds =
-              selectedGroup === 'ALL'
-                ? rawAssignedIds
-                : rawAssignedIds.filter((id) => {
-                    const item = draftCatalogMap.get(id);
-                    return item && item.group === selectedGroup;
-                  });
-
+            const displayedIds = rawAssignedIds;
             const isPendingHere = pendingSlotWarehouse === wh.id;
             const remainingCatalogCount = draftCatalog.length - rawAssignedIds.length;
             const isDarkOrange = wh.accent === 'blue';
@@ -410,7 +300,6 @@ export function DispatcherView() {
                   </div>
                   <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
                     {displayedIds.length}
-                    {selectedGroup !== 'ALL' && ` / ${rawAssignedIds.length}`}
                   </span>
                 </header>
 
@@ -433,9 +322,7 @@ export function DispatcherView() {
                   {displayedIds.length === 0 && !isPendingHere ? (
                     <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 px-4 py-8 text-center">
                       <p className="text-sm font-semibold text-slate-700">
-                        {selectedGroup !== 'ALL' && rawAssignedIds.length > 0
-                          ? `Sin medidas en ${selectedGroup}`
-                          : 'Sin medidas asignadas'}
+                        Sin medidas asignadas
                       </p>
                     </div>
                   ) : (
@@ -481,7 +368,7 @@ export function DispatcherView() {
                                 catalog={draftCatalog}
                                 selectedMeasureId={measureId}
                                 usedMeasureIdsInColumn={rawAssignedIds}
-                                initialGroupFilter={selectedGroup !== 'ALL' ? selectedGroup : null}
+                                initialGroupFilter={null}
                                 variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
                                 onSelect={(newId) =>
                                   handleReplaceMeasure(wh.id, measureId, newId)
@@ -500,7 +387,7 @@ export function DispatcherView() {
                               catalog={draftCatalog}
                               selectedMeasureId={null}
                               usedMeasureIdsInColumn={rawAssignedIds}
-                              initialGroupFilter={selectedGroup !== 'ALL' ? selectedGroup : null}
+                              initialGroupFilter={null}
                               variant={isDarkOrange ? 'orange-dark' : 'orange-light'}
                               placeholder="Elegir medida..."
                               autoOpen
@@ -587,7 +474,7 @@ export function DispatcherView() {
       <CustomMeasureModal
         isOpen={isCustomModalOpen}
         defaultWarehouseId={customModalWarehouse}
-        defaultGroup={selectedGroup !== 'ALL' ? selectedGroup : 'NACIONAL'}
+        defaultGroup="NACIONAL"
         onClose={() => setIsCustomModalOpen(false)}
         onCreate={handleCreateCustomMeasure}
       />

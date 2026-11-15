@@ -98,25 +98,11 @@ describe('Stock por Balanza application', () => {
     expect(screen.getByText(/modo edición - despachador/i)).toBeInTheDocument();
     expect(screen.getByText(/hora de modificación:/i)).toBeInTheDocument();
 
-    // 8 grupos de clasificación requeridos
-    expect(screen.getByRole('button', { name: /^importado/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^fehab/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^nacional\s+\d+ medidas/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^fecoxi/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^fm/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^exportación/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^nacional soldable/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^semi-terminado/i })).toBeInTheDocument();
-
-    // 4 Columnas con sus códigos
+    // 4 Columnas de almacén
     expect(screen.getByRole('heading', { name: 'PT 08' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 09' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - BAHIA' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'PT 15 - CURVA' })).toBeInTheDocument();
-
-    // Filtrar por grupo "NACIONAL"
-    fireEvent.click(screen.getByRole('button', { name: /^nacional\s+\d+ medidas/i }));
-    expect(screen.getByText(/filtrando por grupo:/i)).toBeInTheDocument();
 
     // Confirmado / Verificado guarda a Balanza
     fireEvent.click(screen.getByRole('button', { name: /confirmado \/ verificado/i }));
