@@ -6,8 +6,8 @@ export function HomeView() {
     <main className="relative flex flex-1 items-center overflow-hidden bg-gradient-to-b from-[#F3F8FD] via-[#E9F1FA] to-[#DCE8F6]">
       <div className="bg-industrial-grid pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" />
 
-      <div className="animate-page-enter relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        {/* Título Principal: letras normales, espacio entre palabras bien definido */}
+      <div className="animate-page-enter relative mx-auto flex w-full max-w-6xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        {/* Título Principal */}
         <div className="max-w-5xl text-center">
           <h1 className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 text-4xl font-extrabold tracking-normal text-[#002855] sm:text-6xl">
             <span>STOCK</span>
@@ -16,41 +16,43 @@ export function HomeView() {
           </h1>
         </div>
 
-        {/* Dos Tarjetas Principales (Paleta Azul) */}
+        {/* Dos Tarjetas Principales Ampliadas */}
         <section
           aria-label="Selección de rol"
-          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2"
+          className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 lg:gap-10"
         >
           {/* Botón Izquierdo: Despachador */}
           <Link
             to="/despachador"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-blue-200/80 bg-white/95 p-7 shadow-md shadow-blue-950/5 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gerdau hover:shadow-2xl hover:shadow-blue-950/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau focus-visible:ring-offset-2 sm:p-8"
+            className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-3xl border border-blue-200/80 bg-white/95 p-8 shadow-lg shadow-blue-950/5 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gerdau hover:shadow-2xl hover:shadow-blue-950/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gerdau focus-visible:ring-offset-2 sm:p-11"
           >
-            <div className="absolute inset-x-0 top-0 h-1.5 bg-gerdau transition-all duration-300 group-hover:h-2.5" />
+            <div className="absolute inset-x-0 top-0 h-2 bg-gerdau transition-all duration-300 group-hover:h-3" />
 
             <div>
               <div className="flex items-start justify-between gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gerdau text-sky-200 shadow-md shadow-gerdau/25 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <Edit3 className="h-8 w-8" aria-hidden="true" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gerdau text-sky-200 shadow-md shadow-gerdau/25 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                  <Edit3 className="h-10 w-10" aria-hidden="true" />
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-gerdau-soft px-3 py-1 text-xs font-bold text-gerdau">
-                  <Warehouse className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="inline-flex items-center gap-2 rounded-full bg-gerdau-soft px-4 py-1.5 text-sm font-bold text-gerdau">
+                  <Warehouse className="h-4 w-4" aria-hidden="true" />
                   Panel editable
                 </span>
               </div>
 
-              <h2 className="mt-6 text-2xl font-extrabold text-slate-900 transition-colors group-hover:text-gerdau sm:text-3xl">
+              <h2 className="mt-8 text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-gerdau sm:text-4xl">
                 Despachador
               </h2>
-              <p className="mt-1.5 text-sm font-medium text-slate-600">
+              <p className="mt-2.5 text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
                 Actualizar medidas disponibles por almacén
               </p>
             </div>
 
-            <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
-              <span className="text-sm font-bold text-gerdau">Abrir editable almacén</span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gerdau-soft text-gerdau transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-gerdau group-hover:text-white">
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <div className="mt-9 flex items-center justify-between border-t border-blue-100 pt-5">
+              <span className="text-base font-bold text-gerdau sm:text-lg">
+                Abrir editable almacén
+              </span>
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gerdau-soft text-gerdau transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-gerdau group-hover:text-white">
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </span>
             </div>
           </Link>
@@ -58,33 +60,35 @@ export function HomeView() {
           {/* Botón Derecho: Balanza */}
           <Link
             to="/balanza"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-blue-200/80 bg-white/95 p-7 shadow-md shadow-blue-950/5 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-[#0284C7] hover:shadow-2xl hover:shadow-sky-950/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284C7] focus-visible:ring-offset-2 sm:p-8"
+            className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-3xl border border-blue-200/80 bg-white/95 p-8 shadow-lg shadow-blue-950/5 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-[#0284C7] hover:shadow-2xl hover:shadow-sky-950/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284C7] focus-visible:ring-offset-2 sm:p-11"
           >
-            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-gerdau-light to-[#0284C7] transition-all duration-300 group-hover:h-2.5" />
+            <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-gerdau-light to-[#0284C7] transition-all duration-300 group-hover:h-3" />
 
             <div>
               <div className="flex items-start justify-between gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gerdau-light to-[#0284C7] text-sky-100 shadow-md shadow-sky-900/25 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-3">
-                  <Monitor className="h-8 w-8" aria-hidden="true" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gerdau-light to-[#0284C7] text-sky-100 shadow-md shadow-sky-900/25 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                  <Monitor className="h-10 w-10" aria-hidden="true" />
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F2FC] px-3 py-1 text-xs font-bold text-[#0056A3]">
-                  <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F2FC] px-4 py-1.5 text-sm font-bold text-[#0056A3]">
+                  <Lock className="h-4 w-4" aria-hidden="true" />
                   Solo lectura
                 </span>
               </div>
 
-              <h2 className="mt-6 text-2xl font-extrabold text-slate-900 transition-colors group-hover:text-[#0056A3] sm:text-3xl">
+              <h2 className="mt-8 text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-[#0056A3] sm:text-4xl">
                 Balanza
               </h2>
-              <p className="mt-1.5 text-sm font-medium text-slate-600">
+              <p className="mt-2.5 text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
                 Visualizar medidas disponibles por almacén
               </p>
             </div>
 
-            <div className="mt-7 flex items-center justify-between border-t border-blue-100 pt-4">
-              <span className="text-sm font-bold text-[#0056A3]">Abrir monitor balanza</span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E6F2FC] text-[#0056A3] transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-[#0284C7] group-hover:text-white">
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <div className="mt-9 flex items-center justify-between border-t border-blue-100 pt-5">
+              <span className="text-base font-bold text-[#0056A3] sm:text-lg">
+                Abrir monitor balanza
+              </span>
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#E6F2FC] text-[#0056A3] transition-all duration-300 group-hover:translate-x-1.5 group-hover:bg-[#0284C7] group-hover:text-white">
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </span>
             </div>
           </Link>
