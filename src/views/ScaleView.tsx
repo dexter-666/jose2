@@ -104,16 +104,17 @@ export function ScaleView() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-white/20 px-2 py-0.5 text-xs font-black tracking-wider uppercase">
                       {wh.label}
                     </span>
                     <h2 className="text-base font-black tracking-tight">{wh.label}</h2>
                   </div>
-                  <span className="rounded-full bg-white/20 px-2.5 py-1 font-mono text-xs font-bold text-orange-50">
                     {measures.length}
                   </span>
                 </header>
 
+                {/* Subtítulo de columna */}
+                <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2">
+                  <h3 className="text-xs font-bold tracking-wide text-orange-950 uppercase">
                     Tipos de medida
                   </h3>
                 </div>
