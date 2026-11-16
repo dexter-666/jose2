@@ -140,7 +140,9 @@ export function DispatcherView() {
     });
 
     const duplicate = draftCatalog.find(
-      (m) => m.id === newMeasure.id || m.technicalDescription.toLowerCase() === newMeasure.technicalDescription.toLowerCase()
+      (m) =>
+        m.id === newMeasure.id ||
+        m.technicalDescription.toLowerCase() === newMeasure.technicalDescription.toLowerCase()
     );
     if (duplicate) {
       return {
@@ -228,7 +230,7 @@ export function DispatcherView() {
               <button
                 type="button"
                 onClick={() => openCustomModal()}
-                className="liquid-glass-pill inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold text-orange-950 shadow-sm transition-all hover:text-orange-700 hover:border-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
+                className="liquid-glass-pill inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold text-orange-950 shadow-sm transition-all hover:border-orange-300 hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:text-sm"
               >
                 <Ruler className="h-4 w-4 text-orange-600" aria-hidden="true" />
                 Nueva medida
@@ -333,24 +335,19 @@ export function DispatcherView() {
                         return (
                           <div
                             key={measureId}
-                            className="flex flex-col gap-1.5 rounded-xl border border-orange-200/90 bg-orange-50/40 p-2.5 shadow-xs"
+                            className="flex flex-col gap-2 rounded-xl border border-orange-200/90 bg-orange-50/40 p-2.5 shadow-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              {/* Despachador: Clasificación y Calidad, con código secundario en menor tamaño */}
+                              {/* 1. Código grande (misma escala que Clasificación) + 2. Clasificación (sin repetir calidad) */}
                               <div className="flex flex-wrap items-center gap-1.5">
-                                {measure && (
-                                  <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs sm:text-sm font-black uppercase text-orange-900 border border-orange-200/80">
-                                    {measure.group}
-                                  </span>
-                                )}
-                                {measure?.quality && (
-                                  <span className="rounded-md bg-white px-2 py-0.5 text-xs font-bold text-orange-900 shadow-2xs border border-orange-200">
-                                    {measure.quality}
-                                  </span>
-                                )}
                                 {measure?.sapCode && (
-                                  <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-semibold text-slate-500 border border-slate-200 shadow-2xs">
+                                  <span className="rounded-md border border-slate-300 bg-white px-2.5 py-1 font-mono text-xs font-black text-slate-900 shadow-2xs sm:text-sm">
                                     CÓDIGO: {measure.sapCode}
+                                  </span>
+                                )}
+                                {measure && (
+                                  <span className="rounded-md border border-orange-200/80 bg-orange-100 px-2.5 py-1 text-xs font-black uppercase text-orange-900 sm:text-sm">
+                                    {measure.group}
                                   </span>
                                 )}
                               </div>
@@ -367,7 +364,7 @@ export function DispatcherView() {
                               </button>
                             </div>
 
-                            {/* Selector desplegable con descripción técnica completa */}
+                            {/* Selector desplegable con descripción técnica completa (espesor x largo + calidad) */}
                             <div className="min-w-0 flex-1">
                               <MeasureDropdown
                                 catalog={draftCatalog}
