@@ -104,12 +104,6 @@ export function ScaleView() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                      {wh.label}
-                    </span>
-                    <h2 className="text-base font-black tracking-tight">{wh.label}</h2>
-                  </div>
-                    {measures.length}
-                  </span>
                 </header>
 
                 {/* Subtítulo de columna */}
