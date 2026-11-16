@@ -97,7 +97,7 @@ export function ScaleView() {
                     : 'border-orange-200 shadow-sm'
                 }`}
               >
-                {/* Cabecera fija del almacén con código en naranja / naranja oscuro */}
+                {/* Cabecera fija del almacén */}
                 <header
                   className={`flex items-center justify-between px-4 py-3.5 text-white ${
                     isDarkOrange ? 'bg-orange-700' : 'bg-orange-500'
@@ -116,14 +116,14 @@ export function ScaleView() {
                   </h3>
                 </div>
 
-                {/* Tarjetas estáticas de solo lectura: DATOS OBLIGATORIOS (Código + Texto Completo) */}
+                {/* Tarjetas estáticas alineadas y uniformes */}
                 <div className="flex-1 p-4">
                   {measures.length === 0 ? (
                     <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
                       Sin medidas asignadas
                     </div>
                   ) : (
-                    <ul className="space-y-2.5" aria-label={`Medidas en ${wh.label}`}>
+                    <ul className="space-y-3" aria-label={`Medidas en ${wh.label}`}>
                       {measures.map((measure) => {
                         const affectedMeasureIds = recentPulse?.affectedMeasureIds ?? [];
                         const isPulsingItem =
@@ -134,29 +134,30 @@ export function ScaleView() {
                         return (
                           <li
                             key={`${measure.id}-${isPulsingItem ? recentPulse?.pulseKey : 'idle'}`}
-                            className={`flex flex-col gap-1.5 rounded-xl border p-3 transition-all ${
+                            className={`flex min-h-[96px] flex-col justify-between gap-2 rounded-xl border p-3 transition-all ${
                               isPulsingItem
                                 ? 'animate-stock-pulse border-orange-400 bg-white'
                                 : 'border-orange-200/80 bg-orange-50/50'
                             }`}
                           >
-                            {/* Fila Superior: 1. CÓDIGO primero (mismo tamaño que descripción), 2. Clasificación */}
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                {measure.sapCode && (
-                                  <span className="rounded-md border border-orange-200 bg-white px-2 py-0.5 font-mono text-xs font-black text-slate-900 shadow-2xs sm:text-sm">
-                                    CÓDIGO: {measure.sapCode}
-                                  </span>
-                                )}
-                                <span className="rounded-md border border-orange-200/80 bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900">
-                                  {measure.group}
+                            {/* Fila Superior: 1. Código (mismo tamaño que descripción) + 2. Clasificación alineada */}
+                            <div className="flex items-center justify-between gap-2 border-b border-orange-200/60 pb-2">
+                              {measure.sapCode ? (
+                                <span className="shrink-0 rounded-md border border-orange-200 bg-white px-2 py-0.5 font-mono text-xs font-bold tracking-tight text-slate-900 shadow-2xs sm:text-sm">
+                                  CÓDIGO: {measure.sapCode}
                                 </span>
-                              </div>
+                              ) : (
+                                <span />
+                              )}
+
+                              <span className="truncate rounded-md border border-orange-200/80 bg-orange-100/90 px-2 py-0.5 text-[11px] font-extrabold tracking-wide uppercase text-orange-900">
+                                {measure.group}
+                              </span>
                             </div>
 
-                            {/* Fila Principal: DESCRIPCIÓN TÉCNICA OFICIAL SAP */}
-                            <div className="flex items-start gap-2.5 pt-1">
-                              <div className="pt-1">
+                            {/* Fila Inferior: Indicador centrado + Descripción técnica del mismo tamaño */}
+                            <div className="flex items-center gap-2.5">
+                              <div className="shrink-0">
                                 <ThicknessIndicator diameterMm={measure.diameterMm} />
                               </div>
                               <p className="font-mono text-xs leading-snug font-bold tracking-tight text-slate-900 sm:text-sm">
