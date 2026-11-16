@@ -1,6 +1,5 @@
 import { CheckCircle2, Clock, Lock, X } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot/ConnectionDot';
-import { ThicknessIndicator } from '../components/ThicknessIndicator/ThicknessIndicator';
 import { useStock } from '../context/StockContext';
 import { MeasureItem } from '../types/stock';
 import { WAREHOUSES } from '../utils/measures';
@@ -76,7 +75,7 @@ export function ScaleView() {
           )}
         </section>
 
-        {/* Tablero de 4 Columnas Fijas (Solo Lectura con Código y Texto Completo de Medidas) */}
+        {/* Tablero de 4 Columnas Fijas */}
         <section
           aria-label="Columnas de stock por almacén"
           className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
@@ -116,7 +115,7 @@ export function ScaleView() {
                   </h3>
                 </div>
 
-                {/* Tarjetas estáticas alineadas y uniformes */}
+                {/* Tarjetas 100% alineadas */}
                 <div className="flex-1 p-4">
                   {measures.length === 0 ? (
                     <div className="flex h-full min-h-[150px] items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-4 text-center text-xs font-medium text-slate-500">
@@ -140,7 +139,7 @@ export function ScaleView() {
                                 : 'border-orange-200/80 bg-orange-50/50'
                             }`}
                           >
-                            {/* Fila Superior: 1. Código (mismo tamaño que descripción) + 2. Clasificación alineada */}
+                            {/* Fila Superior: Código (mismo tamaño que descripción) + Clasificación a la derecha */}
                             <div className="flex items-center justify-between gap-2 border-b border-orange-200/60 pb-2">
                               {measure.sapCode ? (
                                 <span className="shrink-0 rounded-md border border-orange-200 bg-white px-2 py-0.5 font-mono text-xs font-bold tracking-tight text-slate-900 shadow-2xs sm:text-sm">
@@ -155,11 +154,12 @@ export function ScaleView() {
                               </span>
                             </div>
 
-                            {/* Fila Inferior: Indicador centrado + Descripción técnica del mismo tamaño */}
-                            <div className="flex items-center gap-2.5">
-                              <div className="shrink-0">
-                                <ThicknessIndicator diameterMm={measure.diameterMm} />
-                              </div>
+                            {/* Fila Inferior: Viñeta fija alineada al borde + Descripción técnica */}
+                            <div className="flex items-start gap-2">
+                              <span
+                                aria-hidden="true"
+                                className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-orange-500"
+                              />
                               <p className="font-mono text-xs leading-snug font-bold tracking-tight text-slate-900 sm:text-sm">
                                 {measure.technicalDescription}
                               </p>
