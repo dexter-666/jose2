@@ -8,9 +8,9 @@ export function HomeView() {
 
       <div className="animate-page-enter relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         {/* Título Principal */}
-        <div className="max-w-3xl text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-[#002855] sm:text-6xl">
-            STOCK       DE      ALMACENES
+        <div className="max-w-4xl text-center">
+          <h1 className="text-4xl font-extrabold tracking-wider [word-spacing:0.35em] text-[#002855] sm:text-6xl">
+            STOCK DE ALMACENES
           </h1>
         </div>
 
