@@ -7,9 +7,9 @@ export function HomeView() {
       <div className="bg-industrial-grid pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" />
 
       <div className="animate-page-enter relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        {/* Título Principal */}
+        {/* Título Principal: letras normales, espacio entre palabras bien definido */}
         <div className="max-w-5xl text-center">
-          <h1 className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-5 text-4xl font-extrabold tracking-[0.06em] text-[#002855] sm:text-6xl">
+          <h1 className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 text-4xl font-extrabold tracking-normal text-[#002855] sm:text-6xl">
             <span>STOCK</span>
             <span>DE</span>
             <span>ALMACENES</span>
