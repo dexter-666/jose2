@@ -10,7 +10,7 @@ export function HomeView() {
         {/* Título Principal */}
         <div className="max-w-3xl text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-[#002855] sm:text-6xl">
-            MEDIDAS DE ALMACENES
+            STOCK DE ALMACENES
           </h1>
         </div>
 
