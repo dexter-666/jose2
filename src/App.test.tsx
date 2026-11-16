@@ -30,7 +30,7 @@ describe('Stock por Balanza application', () => {
 
     expect(screen.getByAltText('Logo Gerdau')).toHaveAttribute('src', '/images/gerdaulogo.png');
     expect(screen.getByAltText('Logo Siderperú')).toHaveAttribute('src', '/images/siderlogo.png');
-    expect(screen.getByRole('heading', { name: /medidas de almacenes/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Stock de almacenes/i })).toBeInTheDocument();
     expect(screen.getByText(/actualizar medidas disponibles por almacén/i)).toBeInTheDocument();
     expect(screen.getByText(/visualizar medidas disponibles por almacén/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /abrir editable almacén/i })).toHaveAttribute(
