@@ -114,8 +114,6 @@ export function ScaleView() {
                   </span>
                 </header>
 
-                {/* Subtítulo de columna */}
-                <div className="flex items-center justify-between border-b border-orange-100 bg-orange-50/75 px-4 py-2">
                     Tipos de medida
                   </h3>
                 </div>
