@@ -140,17 +140,15 @@ export function ScaleView() {
                                 : 'border-orange-200/80 bg-orange-50/50'
                             }`}
                           >
-                            {/* Fila Superior: 1. CÓDIGO primero (negrita, mediano), 2. Clasificación */}
+                            {/* Fila Superior: 1. CÓDIGO primero (mismo tamaño que descripción), 2. Clasificación */}
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex flex-wrap items-center gap-2">
-                                {/* CÓDIGO PRIMERO (Negrita, tamaño mediano) */}
                                 {measure.sapCode && (
-                                  <span className="rounded-md bg-white px-2.5 py-1 font-mono text-sm sm:text-base font-black text-slate-900 shadow-2xs border border-orange-200">
+                                  <span className="rounded-md border border-orange-200 bg-white px-2 py-0.5 font-mono text-xs font-black text-slate-900 shadow-2xs sm:text-sm">
                                     CÓDIGO: {measure.sapCode}
                                   </span>
                                 )}
-                                {/* CLASIFICACIÓN */}
-                                <span className="rounded-md bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900 border border-orange-200/80">
+                                <span className="rounded-md border border-orange-200/80 bg-orange-100/90 px-2 py-0.5 text-xs font-bold uppercase text-orange-900">
                                   {measure.group}
                                 </span>
                               </div>
@@ -159,11 +157,9 @@ export function ScaleView() {
                             {/* Fila Principal: DESCRIPCIÓN TÉCNICA OFICIAL SAP */}
                             <div className="flex items-start gap-2.5 pt-1">
                               <div className="pt-1">
-                                <ThicknessIndicator
-                                  diameterMm={measure.diameterMm}
-                                />
+                                <ThicknessIndicator diameterMm={measure.diameterMm} />
                               </div>
-                              <p className="font-mono text-xs sm:text-sm font-bold leading-snug tracking-tight text-slate-900">
+                              <p className="font-mono text-xs leading-snug font-bold tracking-tight text-slate-900 sm:text-sm">
                                 {measure.technicalDescription}
                               </p>
                             </div>
