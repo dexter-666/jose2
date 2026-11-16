@@ -1,5 +1,4 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { AppHeader } from './components/AppHeader/AppHeader';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -13,7 +12,6 @@ export function App() {
   return (
     <AuthProvider>
       <StockProvider>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="flex min-h-screen flex-col bg-surface-panel text-slate-900">
             <AppHeader />
             <ErrorBoundary>
