@@ -48,7 +48,7 @@ describe('Stock por Balanza application', () => {
     render(<App />);
 
     // Redirige al login con foco en despachador
-    expect(screen.getByRole('heading', { name: /control de medidas/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /control de Stock/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Despachador');
     expect(screen.getByRole('link', { name: /volver a selección de roles/i })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: /volver al inicio/i })).toHaveAttribute('href', '/');
@@ -70,7 +70,7 @@ describe('Stock por Balanza application', () => {
     window.history.pushState({}, '', '/balanza');
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /control de medidas/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /control de Stock/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/^usuario$/i)).toHaveValue('Balancero');
 
     fireEvent.change(screen.getByLabelText(/^contraseña$/i), { target: { value: 'Balanza2026' } });
